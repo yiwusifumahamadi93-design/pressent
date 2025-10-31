@@ -1,0 +1,2972 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>نظام إدارة الحضور والغياب المتطور</title>
+  <script src="/_sdk/data_sdk.js"></script>
+  <script src="/_sdk/element_sdk.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+        body {
+            box-sizing: border-box;
+            font-family: 'Inter', 'Cairo', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            overflow-x: hidden;
+            -webkit-overflow-scrolling: touch;
+        }
+        .rtl {
+            direction: rtl;
+            text-align: right;
+        }
+        .loading {
+            opacity: 0.6;
+            pointer-events: none;
+        }
+        
+        /* Mobile-First Responsive Design */
+        @media (max-width: 768px) {
+            .mobile-hidden { display: none !important; }
+            .mobile-full { width: 100% !important; }
+            .mobile-text-sm { font-size: 0.875rem !important; }
+            .mobile-text-xs { font-size: 0.75rem !important; }
+            .mobile-p-2 { padding: 0.5rem !important; }
+            .mobile-p-4 { padding: 1rem !important; }
+            .mobile-mb-4 { margin-bottom: 1rem !important; }
+            .mobile-grid-1 { grid-template-columns: repeat(1, minmax(0, 1fr)) !important; }
+            .mobile-grid-2 { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+            .mobile-space-y-2 > * + * { margin-top: 0.5rem !important; }
+            .mobile-overflow-x { overflow-x: auto !important; }
+            .mobile-min-w-full { min-width: 100% !important; }
+            
+            /* Global mobile adjustments */
+            body { font-size: 14px; }
+            .max-w-7xl { max-width: 100%; padding: 0 0.75rem; }
+            .px-6 { padding-left: 0.75rem; padding-right: 0.75rem; }
+            .py-8 { padding-top: 1.5rem; padding-bottom: 1.5rem; }
+            .text-6xl { font-size: 2rem; line-height: 1.2; }
+            .text-4xl { font-size: 1.5rem; line-height: 1.3; }
+            .text-3xl { font-size: 1.25rem; line-height: 1.4; }
+            .text-2xl { font-size: 1.125rem; line-height: 1.4; }
+            .text-xl { font-size: 1rem; line-height: 1.5; }
+            .text-lg { font-size: 0.9375rem; line-height: 1.5; }
+            .p-10 { padding: 1.5rem; }
+            .p-8 { padding: 1rem; }
+            .p-6 { padding: 0.75rem; }
+            .p-5 { padding: 0.625rem; }
+            .p-4 { padding: 0.5rem; }
+            .mb-10 { margin-bottom: 1.5rem; }
+            .mb-8 { margin-bottom: 1rem; }
+            .mb-6 { margin-bottom: 0.75rem; }
+            .gap-8 { gap: 0.75rem; }
+            .gap-6 { gap: 0.5rem; }
+            .space-x-3 > * + * { margin-right: 0.375rem; }
+            .space-x-2 > * + * { margin-right: 0.25rem; }
+            .rounded-3xl { border-radius: 1rem; }
+            .rounded-2xl { border-radius: 0.75rem; }
+            .w-24 { width: 4rem; height: 4rem; }
+            .w-16 { width: 3rem; height: 3rem; }
+            .w-14 { width: 2.5rem; height: 2.5rem; }
+            .w-12 { width: 2rem; height: 2rem; }
+            .w-10 { width: 1.75rem; height: 1.75rem; }
+            .w-8 { width: 1.5rem; height: 1.5rem; }
+        }
+        
+        /* Touch-friendly interactions */
+        .touch-btn {
+            min-height: 44px;
+            min-width: 44px;
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        /* Responsive tables */
+        .responsive-table {
+            display: block;
+            width: 100%;
+            overflow-x: auto;
+            white-space: nowrap;
+            -webkit-overflow-scrolling: touch;
+        }
+        
+        @media (max-width: 768px) {
+            .responsive-table {
+                font-size: 0.75rem;
+            }
+            .responsive-table th,
+            .responsive-table td {
+                padding: 0.375rem 0.25rem;
+                min-width: 70px;
+            }
+            .responsive-table th:first-child,
+            .responsive-table td:first-child {
+                position: sticky;
+                right: 0;
+                background: white;
+                z-index: 1;
+            }
+        }
+        
+        /* Modern Animations - Optimized for mobile */
+        .fade-in {
+            animation: modernFadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        @keyframes modernFadeIn {
+            from { opacity: 0; transform: translateY(20px) scale(0.98); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        
+        .slide-in {
+            animation: modernSlideIn 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+        @keyframes modernSlideIn {
+            from { opacity: 0; transform: translateX(30px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        
+        .float-animation {
+            animation: modernFloat 2s ease-in-out infinite;
+        }
+        @keyframes modernFloat {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-5px); }
+        }
+        
+        /* Gradient Backgrounds - Enhanced Color System */
+        .gradient-primary {
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 50%, #1d4ed8 100%);
+        }
+        .gradient-success {
+            background: linear-gradient(135deg, #10b981 0%, #059669 50%, #047857 100%);
+        }
+        .gradient-danger {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 50%, #b91c1c 100%);
+        }
+        .gradient-info {
+            background: linear-gradient(135deg, #06b6d4 0%, #0891b2 50%, #0e7490 100%);
+        }
+        .gradient-ocean {
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 30%, #1d4ed8 60%, #1e3a8a 100%);
+        }
+        .gradient-warning {
+            background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 50%, #d97706 100%);
+        }
+        .gradient-purple {
+            background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 50%, #6d28d9 100%);
+        }
+        .gradient-indigo {
+            background: linear-gradient(135deg, #6366f1 0%, #4f46e5 50%, #4338ca 100%);
+        }
+        
+        /* Glass Morphism Effect - Lighter for mobile */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.12);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            box-shadow: 0 4px 16px 0 rgba(0, 0, 0, 0.08);
+        }
+        
+        /* Modern Card Effects - Reduced for mobile */
+        .modern-card {
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+            overflow: hidden;
+        }
+        .modern-card:hover {
+            transform: translateY(-4px) scale(1.01);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+        }
+        
+        /* Interactive Elements */
+        .interactive-btn {
+            position: relative;
+            overflow: hidden;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .interactive-btn:active {
+            transform: scale(0.98);
+        }
+        
+        /* Navigation optimized for mobile */
+        @media (max-width: 768px) {
+            .nav-item {
+                padding: 0.75rem 0.5rem !important;
+                font-size: 0.875rem !important;
+            }
+            .nav-item .flex {
+                flex-direction: column;
+                align-items: center;
+                gap: 0.25rem;
+            }
+            .nav-item .w-8 {
+                width: 1.25rem;
+                height: 1.25rem;
+                margin: 0;
+            }
+        }
+        
+        /* Stats cards mobile optimization */
+        @media (max-width: 768px) {
+            .stats-counter {
+                font-size: 1.875rem !important;
+            }
+        }
+        
+        /* Form elements mobile optimization */
+        @media (max-width: 768px) {
+            input, select, button {
+                font-size: 16px; /* Prevents zoom on iOS */
+                padding: 0.75rem;
+            }
+        }
+        
+        /* Custom Scrollbar - Thinner for mobile */
+        ::-webkit-scrollbar {
+            width: 4px;
+            height: 4px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 10px;
+        }
+        
+        /* Bounce Animation - Reduced for mobile */
+        .bounce-in {
+            animation: modernBounceIn 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+        @keyframes modernBounceIn {
+            0% { opacity: 0; transform: scale(0.5); }
+            50% { opacity: 1; transform: scale(1.05); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+        
+        /* Pulse Ring - Smaller for mobile */
+        .pulse-ring {
+            animation: pulseRing 2s cubic-bezier(0.455, 0.03, 0.515, 0.955) infinite;
+        }
+        @keyframes pulseRing {
+            0% { transform: scale(0.9); opacity: 1; }
+            100% { transform: scale(2); opacity: 0; }
+        }
+        
+        /* Notification Badge */
+        .notification-badge {
+            animation: notificationPulse 2s ease-in-out infinite;
+        }
+        @keyframes notificationPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+        
+        /* Loading Spinner */
+        .modern-spinner {
+            animation: modernSpin 1s linear infinite;
+        }
+        @keyframes modernSpin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        /* Gradient Text */
+        .gradient-text {
+            color: #ffffff;
+            text-shadow: 0 0 15px rgba(255, 255, 255, 0.6);
+        }
+        
+        .neon-glow {
+            text-shadow: 0 0 8px rgba(255, 255, 255, 0.4);
+        }
+        
+        /* Progress bar animation */
+        @keyframes progressBar {
+            0% { width: 0%; }
+            50% { width: 70%; }
+            100% { width: 100%; }
+        }
+    </style>
+  <style>@view-transition { navigation: auto; }</style>
+ </head>
+ <body class="rtl bg-gray-50">
+  <div id="app" class="min-h-full"><!-- Login Screen -->
+   <div id="login-screen" class="min-h-full flex items-center justify-center gradient-ocean relative overflow-hidden"><!-- Animated Background Elements -->
+    <div class="absolute inset-0 overflow-hidden mobile-hidden">
+     <div class="absolute -top-40 -right-40 w-80 h-80 bg-white opacity-10 rounded-full float-animation"></div>
+     <div class="absolute -bottom-40 -left-40 w-96 h-96 bg-white opacity-5 rounded-full float-animation" style="animation-delay: 1s;"></div>
+     <div class="absolute top-1/2 left-1/2 w-64 h-64 bg-white opacity-5 rounded-full float-animation" style="animation-delay: 2s;"></div>
+    </div>
+    <div class="max-w-lg w-full mx-4 relative z-10">
+     <div class="glass-card rounded-3xl shadow-2xl p-10 mobile-p-4 bounce-in backdrop-blur-xl">
+      <div class="text-center mb-10 mobile-mb-4"><!-- Logo with Pulse Ring Effect -->
+       <div class="relative inline-block mb-6 mobile-mb-4">
+        <div class="absolute inset-0 w-24 h-24 bg-white opacity-20 rounded-full pulse-ring mobile-hidden"></div>
+        <div class="w-24 h-24 gradient-primary rounded-2xl flex items-center justify-center mx-auto shadow-2xl modern-card">
+         <svg class="w-12 h-12 text-white float-animation" fill="currentColor" viewbox="0 0 20 20"><path d="M10.394 2.08a1 1 0 00-.788 0l-7 3a1 1 0 000 1.84L5.25 8.051a.999.999 0 01.356-.257l4-1.714a1 1 0 11.788 1.838L7.667 9.088l1.94.831a1 1 0 00.787 0l7-3a1 1 0 000-1.838l-7-3zM3.31 9.397L5 10.12v4.102a8.969 8.969 0 00-1.05-.174 1 1 0 01-.89-.89 11.115 11.115 0 01.25-3.762zM9.3 16.573A9.026 9.026 0 007 14.935v-3.957l1.818.78a3 3 0 002.364 0l5.508-2.361a11.026 11.026 0 01.25 3.762 1 1 0 01-.89.89 8.968 8.968 0 00-5.35 2.524 1 1 0 01-1.4 0zM6 18a1 1 0 001-1v-2.065a8.935 8.935 0 00-2-.712V17a1 1 0 001 1z" />
+         </svg>
+        </div>
+       </div>
+       <h1 class="text-4xl font-bold text-white mb-3 neon-glow">نظام الحضور المتطور</h1>
+       <p class="text-white text-lg mobile-text-sm mb-2 opacity-90">إدارة ذكية للحضور والغياب</p>
+       <p class="text-sm mobile-text-xs text-white font-semibold opacity-90 bg-white bg-opacity-20 rounded-full px-4 py-2 inline-block">🏛️ كلية الهندسة - جامعة القاهرة</p>
+      </div><!-- Demo Notice -->
+      <div class="glass-card rounded-2xl p-5 mobile-p-4 mb-8 mobile-mb-4 border border-white border-opacity-30">
+       <div class="flex items-center">
+        <div class="flex-shrink-0">
+         <div class="w-10 h-10 gradient-danger rounded-full flex items-center justify-center">
+          <svg class="h-5 w-5 text-white" viewbox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+          </svg>
+         </div>
+        </div>
+        <div class="mr-4">
+         <h3 class="text-sm font-bold text-white">⚡ نظام تجريبي</h3>
+         <p class="text-sm mobile-text-xs text-white opacity-80 mt-1">هذا نظام وهمي للعرض التوضيحي فقط</p>
+        </div>
+       </div>
+      </div>
+      <form id="login-form" class="space-y-8 mobile-space-y-2">
+       <div class="space-y-2"><label for="user-type" class="block text-sm font-bold text-white mb-3 opacity-90">👤 نوع المستخدم</label> <select id="user-type" class="w-full p-5 mobile-p-4 glass-card border border-white border-opacity-30 rounded-2xl focus:ring-2 focus:ring-white focus:ring-opacity-50 transition-all text-white bg-white bg-opacity-10 backdrop-blur-sm touch-btn"> <option value="" class="text-gray-800">اختر نوع المستخدم</option> <option value="admin" class="text-gray-800">🔧 إدارة النظام</option> <option value="teacher" class="text-gray-800">👨‍🏫 معلم</option> <option value="student" class="text-gray-800">🎓 طالب</option> </select>
+       </div>
+       <div class="space-y-2"><label for="username" class="block text-sm font-bold text-white mb-3 opacity-90">📧 اسم المستخدم</label> <input type="text" id="username" class="w-full p-5 mobile-p-4 glass-card border border-white border-opacity-30 rounded-2xl focus:ring-2 focus:ring-white focus:ring-opacity-50 transition-all text-white placeholder-white placeholder-opacity-60 bg-white bg-opacity-10 backdrop-blur-sm touch-btn" placeholder="أدخل اسم المستخدم">
+       </div>
+       <div class="space-y-2"><label for="password" class="block text-sm font-bold text-white mb-3 opacity-90">🔒 كلمة المرور</label> <input type="password" id="password" class="w-full p-5 mobile-p-4 glass-card border border-white border-opacity-30 rounded-2xl focus:ring-2 focus:ring-white focus:ring-opacity-50 transition-all text-white placeholder-white placeholder-opacity-60 bg-white bg-opacity-10 backdrop-blur-sm touch-btn" placeholder="أدخل كلمة المرور">
+       </div><button type="submit" id="login-btn" class="w-full gradient-primary text-white py-5 mobile-p-4 px-6 rounded-2xl font-bold text-xl mobile-text-lg transition-all transform hover:scale-105 interactive-btn modern-card shadow-2xl touch-btn"> <span class="flex items-center justify-center">
+         <svg class="w-6 h-6 ml-3" fill="currentColor" viewbox="0 0 20 20"><path fill-rule="evenodd" d="M3 3a1 1 0 011 1v12a1 1 0 11-2 0V4a1 1 0 011-1zm7.707 3.293a1 1 0 010 1.414L9.414 9H17a1 1 0 110 2H9.414l1.293 1.293a1 1 0 01-1.414 1.414l-3-3a1 1 0 010-1.414l3-3a1 1 0 011.414 0z" clip-rule="evenodd" />
+         </svg> 🚀 تسجيل الدخول </span> </button>
+      </form><!-- Demo Credentials -->
+      <div class="mt-10 mobile-mb-4 glass-card rounded-2xl p-6 mobile-p-4 border border-white border-opacity-20">
+       <h4 class="text-sm font-bold text-white mb-4 text-center flex items-center justify-center">
+        <svg class="w-5 h-5 ml-2" fill="currentColor" viewbox="0 0 20 20"><path fill-rule="evenodd" d="M18 8a6 6 0 01-7.743 5.743L10 14l-1 1-1 1H6v2H2v-4l4.257-4.257A6 6 0 1118 8zm-6-4a1 1 0 100 2 2 2 0 012 2 1 1 0 102 0 4 4 0 00-4-4z" clip-rule="evenodd" />
+        </svg> 🔑 بيانات تجريبية للدخول</h4>
+       <div class="space-y-3 text-sm mobile-text-xs text-white">
+        <div class="flex justify-between items-center bg-white bg-opacity-10 rounded-xl p-3 mobile-p-2 backdrop-blur-sm"><span class="flex items-center"> <span class="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-xs ml-3 mobile-hidden">🔧</span> إدارة النظام </span> <span class="font-mono bg-white bg-opacity-20 px-3 py-1 rounded-lg text-xs">admin / admin123</span>
+        </div>
+        <div class="flex justify-between items-center bg-white bg-opacity-10 rounded-xl p-3 mobile-p-2 backdrop-blur-sm"><span class="flex items-center"> <span class="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center text-xs ml-3 mobile-hidden">👨‍🏫</span> معلم </span> <span class="font-mono bg-white bg-opacity-20 px-3 py-1 rounded-lg text-xs">teacher / teacher123</span>
+        </div>
+        <div class="flex justify-between items-center bg-white bg-opacity-10 rounded-xl p-3 mobile-p-2 backdrop-blur-sm"><span class="flex items-center"> <span class="w-8 h-8 bg-purple-500 rounded-full flex items-center justify-center text-xs ml-3 mobile-hidden">🎓</span> طالب </span> <span class="font-mono bg-white bg-opacity-20 px-3 py-1 rounded-lg text-xs">student / student123</span>
+        </div>
+       </div>
+      </div>
+      <div id="login-error" class="hidden mt-6 glass-card p-4 border border-red-300 border-opacity-50 rounded-2xl text-red-100 text-sm backdrop-blur-sm bg-red-500 bg-opacity-20"></div>
+     </div>
+    </div>
+   </div><!-- Welcome Screen -->
+   <div id="welcome-screen" class="hidden min-h-full gradient-ocean flex items-center justify-center relative overflow-hidden"><!-- Animated Background -->
+    <div class="absolute inset-0 mobile-hidden">
+     <div class="absolute top-20 left-20 w-32 h-32 bg-white opacity-10 rounded-full float-animation"></div>
+     <div class="absolute bottom-20 right-20 w-48 h-48 bg-white opacity-5 rounded-full float-animation" style="animation-delay: 1s;"></div>
+     <div class="absolute top-1/2 right-1/3 w-24 h-24 bg-white opacity-10 rounded-full float-animation" style="animation-delay: 2s;"></div>
+    </div>
+    <div class="text-center text-white p-10 mobile-p-4 bounce-in relative z-10"><!-- Success Icon with Pulse Ring -->
+     <div class="relative inline-block mb-8 mobile-mb-4">
+      <div class="absolute inset-0 w-40 h-40 bg-white opacity-20 rounded-full pulse-ring mobile-hidden"></div>
+      <div class="w-40 h-40 glass-card rounded-full flex items-center justify-center mx-auto shadow-2xl modern-card">
+       <svg class="w-20 h-20 text-white float-animation" fill="currentColor" viewbox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+       </svg>
+      </div>
+     </div>
+     <h1 class="text-6xl font-bold mb-6 neon-glow">🎉 مرحباً بك!</h1>
+     <p id="welcome-message" class="text-3xl mobile-text-xl mb-8 mobile-mb-4 opacity-90 font-semibold"></p>
+     <div class="glass-card rounded-3xl p-8 mobile-p-4 mb-10 mobile-mb-4 backdrop-blur-xl border border-white border-opacity-30">
+      <div class="flex items-center justify-center mb-6 mobile-mb-4">
+       <div class="w-16 h-16 gradient-success rounded-full flex items-center justify-center ml-4">
+        <svg class="w-8 h-8 text-white" fill="currentColor" viewbox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+        </svg>
+       </div>
+       <div>
+        <p class="text-2xl mobile-text-lg font-bold mb-2">✅ تم تسجيل الدخول بنجاح</p>
+        <p class="text-lg mobile-text-sm opacity-80">جاري تحضير لوحة التحكم الخاصة بك...</p>
+       </div>
+      </div><!-- Progress Bar -->
+      <div class="w-full bg-white bg-opacity-20 rounded-full h-3 mb-4">
+       <div class="gradient-primary h-3 rounded-full" style="width: 0%; animation: progressBar 3s ease-in-out forwards;"></div>
+      </div>
+      <p class="text-sm mobile-text-xs opacity-70">⚡ تحميل البيانات والإعدادات...</p>
+     </div><!-- Loading Animation -->
+     <div class="flex justify-center items-center space-x-reverse space-x-2">
+      <div class="w-4 h-4 bg-white rounded-full animate-bounce"></div>
+      <div class="w-4 h-4 bg-white rounded-full animate-bounce" style="animation-delay: 0.1s;"></div>
+      <div class="w-4 h-4 bg-white rounded-full animate-bounce" style="animation-delay: 0.2s;"></div>
+     </div>
+    </div>
+   </div><!-- Main App -->
+   <div id="main-app" class="hidden"><!-- Header -->
+    <header class="gradient-ocean text-white shadow-2xl relative overflow-hidden"><!-- Background Pattern -->
+     <div class="absolute inset-0 opacity-10 mobile-hidden">
+      <div class="absolute top-0 right-0 w-64 h-64 bg-white rounded-full -translate-y-32 translate-x-32"></div>
+      <div class="absolute bottom-0 left-0 w-48 h-48 bg-white rounded-full translate-y-24 -translate-x-24"></div>
+     </div>
+     <div class="max-w-7xl mx-auto px-6 mobile-p-4 py-8 mobile-py-4 relative z-10">
+      <div class="flex justify-between items-center mobile-grid-1 mobile-space-y-2">
+       <div class="flex items-center mobile-grid-1 mobile-space-y-2"><!-- Logo with Animation -->
+        <div class="relative ml-6 mobile-hidden">
+         <div class="w-16 h-16 glass-card rounded-2xl flex items-center justify-center modern-card">
+          <svg class="w-8 h-8 text-white float-animation" fill="currentColor" viewbox="0 0 20 20"><path d="M10.394 2.08a1 1 0 00-.788 0l-7 3a1 1 0 000 1.84L5.25 8.051a.999.999 0 01.356-.257l4-1.714a1 1 0 11.788 1.838L7.667 9.088l1.94.831a1 1 0 00.787 0l7-3a1 1 0 000-1.838l-7-3z" />
+          </svg>
+         </div>
+        </div>
+        <div class="text-center">
+         <h1 id="system-title" class="text-4xl mobile-text-xl font-bold mb-2 text-white neon-glow">نظام إدارة الحضور المتطور</h1>
+         <p id="college-name" class="text-white opacity-90 text-lg mobile-text-sm flex items-center justify-center">
+          <svg class="w-5 h-5 ml-2 mobile-hidden" fill="currentColor" viewbox="0 0 20 20"><path fill-rule="evenodd" d="M4 4a2 2 0 012-2h8a2 2 0 012 2v12a1 1 0 110 2h-3a1 1 0 01-1-1v-6a1 1 0 00-1-1H9a1 1 0 00-1 1v6a1 1 0 01-1 1H4a1 1 0 110-2V4zm3 1h2v2H7V5zm2 4H7v2h2V9zm2-4h2v2h-2V5zm2 4h-2v2h2V9z" clip-rule="evenodd" />
+          </svg> 🏛️ كلية الهندسة - جامعة القاهرة</p>
+        </div>
+       </div><!-- User Profile -->
+       <div class="text-center">
+        <div class="glass-card rounded-2xl p-4 mobile-p-2 backdrop-blur-xl border border-white border-opacity-30">
+         <div class="flex items-center mb-3 mobile-mb-2">
+          <div class="w-14 h-14 gradient-primary rounded-2xl flex items-center justify-center ml-4 mobile-hidden modern-card"><span id="user-avatar" class="text-2xl">👤</span>
+          </div>
+          <div>
+           <p class="text-white opacity-80 text-sm mobile-text-xs mb-1">مرحباً،</p>
+           <p class="font-bold text-lg mobile-text-sm text-white"><span id="logged-user-name"></span></p>
+          </div>
+         </div>
+         <div class="flex items-center justify-between mobile-grid-1 mobile-space-y-2"><span id="logged-user-type" class="text-xs bg-white bg-opacity-30 text-white px-3 py-2 rounded-full font-semibold backdrop-blur-sm"></span> <button id="logout-btn" class="text-sm mobile-text-xs text-white opacity-80 hover:opacity-100 underline mr-3 mobile-full transition-all interactive-btn touch-btn">
+           <svg class="w-4 h-4 inline ml-1" fill="currentColor" viewbox="0 0 20 20"><path fill-rule="evenodd" d="M3 3a1 1 0 00-1 1v12a1 1 0 102 0V4a1 1 0 00-1-1zm10.293 9.293a1 1 0 001.414 1.414l3-3a1 1 0 000-1.414l-3-3a1 1 0 10-1.414 1.414L14.586 9H7a1 1 0 100 2h7.586l-1.293 1.293z" clip-rule="evenodd" />
+           </svg> تسجيل الخروج </button>
+         </div>
+        </div>
+       </div>
+      </div>
+     </div>
+    </header><!-- Navigation Menu -->
+    <nav class="bg-white shadow-2xl border-b border-gray-200 mobile-overflow-x">
+     <div class="max-w-7xl mx-auto px-6 mobile-p-2">
+      <div class="flex justify-center mobile-justify-start mobile-overflow-x">
+       <div class="flex space-x-reverse space-x-2 mobile-min-w-full"><!-- Dashboard --> <button id="nav-dashboard" class="nav-btn nav-item px-10 mobile-p-2 py-5 mobile-py-3 text-blue-600 font-bold bg-blue-50 rounded-t-2xl modern-card active touch-btn">
+         <div class="flex items-center mobile-grid-1">
+          <div class="w-8 h-8 bg-blue-100 rounded-xl flex items-center justify-center ml-3 mobile-ml-0">
+           <svg class="w-4 h-4 text-blue-600" fill="currentColor" viewbox="0 0 20 20"><path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z" />
+           </svg>
+          </div><span class="text-lg mobile-text-sm">📊 لوحة التحكم</span>
+         </div></button> <!-- Attendance --> <button id="nav-attendance" class="nav-btn nav-item px-10 mobile-p-2 py-5 mobile-py-3 text-gray-600 hover:text-blue-600 font-semibold hover:bg-gray-50 rounded-t-2xl transition-all modern-card touch-btn">
+         <div class="flex items-center mobile-grid-1">
+          <div class="w-8 h-8 bg-green-100 rounded-xl flex items-center justify-center ml-3 mobile-ml-0">
+           <svg class="w-4 h-4 text-green-600" fill="currentColor" viewbox="0 0 20 20"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+           </svg>
+          </div><span class="text-lg mobile-text-sm">✅ تسجيل الحضور</span>
+         </div></button> <!-- Reports --> <button id="nav-reports" class="nav-btn nav-item px-10 mobile-p-2 py-5 mobile-py-3 text-gray-600 hover:text-blue-600 font-semibold hover:bg-gray-50 rounded-t-2xl transition-all modern-card touch-btn">
+         <div class="flex items-center mobile-grid-1">
+          <div class="w-8 h-8 bg-purple-100 rounded-xl flex items-center justify-center ml-3 mobile-ml-0">
+           <svg class="w-4 h-4 text-purple-600" fill="currentColor" viewbox="0 0 20 20"><path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z" /> <path fill-rule="evenodd" d="M4 5a2 2 0 012-2v1a2 2 0 002 2h8a2 2 0 002-2V3a2 2 0 012 2v6h-3a3 3 0 00-3 3v3H6a2 2 0 01-2-2V5z" clip-rule="evenodd" />
+           </svg>
+          </div><span class="text-lg mobile-text-sm">📈 التقارير</span> <span id="reports-badge" class="notification-badge bg-red-500 text-white text-xs rounded-full px-2 py-1 mr-2 hidden mobile-hidden">جديد</span>
+         </div></button> <!-- Students Management --> <button id="nav-students" class="nav-btn nav-item px-10 mobile-p-2 py-5 mobile-py-3 text-gray-600 hover:text-blue-600 font-semibold hover:bg-gray-50 rounded-t-2xl transition-all modern-card touch-btn">
+         <div class="flex items-center mobile-grid-1">
+          <div class="w-8 h-8 bg-orange-100 rounded-xl flex items-center justify-center ml-3 mobile-ml-0">
+           <svg class="w-4 h-4 text-orange-600" fill="currentColor" viewbox="0 0 20 20"><path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3z" />
+           </svg>
+          </div><span class="text-lg mobile-text-sm">👥 إدارة الطلاب</span>
+         </div></button> <!-- Student Personal View --> <button id="nav-student-view" class="nav-btn nav-item px-10 mobile-p-2 py-5 mobile-py-3 text-gray-600 hover:text-blue-600 font-semibold hover:bg-gray-50 rounded-t-2xl transition-all modern-card hidden touch-btn">
+         <div class="flex items-center mobile-grid-1">
+          <div class="w-8 h-8 bg-indigo-100 rounded-xl flex items-center justify-center ml-3 mobile-ml-0">
+           <svg class="w-4 h-4 text-indigo-600" fill="currentColor" viewbox="0 0 20 20"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
+           </svg>
+          </div><span class="text-lg mobile-text-sm">🎓 حضوري الشخصي</span>
+         </div></button>
+       </div>
+      </div>
+     </div>
+    </nav><!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-6 mobile-p-4 py-8 mobile-py-4"><!-- Dashboard Section -->
+     <div id="dashboard-section" class="section"><!-- Quick Stats -->
+      <div class="grid grid-cols-1 md:grid-cols-4 mobile-grid-2 gap-8 mobile-gap-6 mb-12 mobile-mb-4">
+       <div class="gradient-primary p-8 mobile-p-4 rounded-3xl text-white modern-card shadow-2xl fade-in" style="animation-delay: 0.1s">
+        <div class="flex items-center justify-between mobile-grid-1 mobile-space-y-2">
+         <div class="text-center">
+          <p class="text-white opacity-90 text-sm mobile-text-xs font-semibold mb-2 flex items-center justify-center">
+           <svg class="w-4 h-4 ml-2 mobile-hidden" fill="currentColor" viewbox="0 0 20 20"><path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3z" />
+           </svg> إجمالي الطلاب</p>
+          <p id="total-students" class="text-4xl mobile-text-2xl font-bold stats-counter mb-1">24</p>
+          <p class="text-blue-100 text-xs">طالب مسجل</p>
+         </div>
+         <div class="w-16 h-16 bg-white bg-opacity-20 rounded-2xl flex items-center justify-center float-animation mobile-hidden">
+          <svg class="w-8 h-8 text-white" fill="currentColor" viewbox="0 0 20 20"><path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3z" />
+          </svg>
+         </div>
+        </div>
+       </div>
+       <div class="gradient-success p-8 mobile-p-4 rounded-3xl text-white modern-card shadow-2xl fade-in" style="animation-delay: 0.2s">
+        <div class="flex items-center justify-between mobile-grid-1 mobile-space-y-2">
+         <div class="text-center">
+          <p class="text-white opacity-90 text-sm mobile-text-xs font-semibold mb-2 flex items-center justify-center">
+           <svg class="w-4 h-4 ml-2 mobile-hidden" fill="currentColor" viewbox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+           </svg> حضور اليوم</p>
+          <p id="today-present" class="text-4xl mobile-text-2xl font-bold stats-counter mb-1">0</p>
+          <p class="text-green-100 text-xs">طالب حاضر</p>
+         </div>
+         <div class="w-16 h-16 bg-white bg-opacity-20 rounded-2xl flex items-center justify-center float-animation mobile-hidden" style="animation-delay: 0.5s">
+          <svg class="w-8 h-8 text-white" fill="currentColor" viewbox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+          </svg>
+         </div>
+        </div>
+       </div>
+       <div class="gradient-danger p-8 mobile-p-4 rounded-3xl text-white modern-card shadow-2xl fade-in" style="animation-delay: 0.3s">
+        <div class="flex items-center justify-between mobile-grid-1 mobile-space-y-2">
+         <div class="text-center">
+          <p class="text-white opacity-90 text-sm mobile-text-xs font-semibold mb-2 flex items-center justify-center">
+           <svg class="w-4 h-4 ml-2 mobile-hidden" fill="currentColor" viewbox="0 0 20 20"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+           </svg> غياب اليوم</p>
+          <p id="today-absent" class="text-4xl mobile-text-2xl font-bold stats-counter mb-1">0</p>
+          <p class="text-red-100 text-xs">طالب غائب</p>
+         </div>
+         <div class="w-16 h-16 bg-white bg-opacity-20 rounded-2xl flex items-center justify-center float-animation mobile-hidden" style="animation-delay: 1s">
+          <svg class="w-8 h-8 text-white" fill="currentColor" viewbox="0 0 20 20"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+          </svg>
+         </div>
+        </div>
+       </div>
+       <div class="gradient-purple p-8 mobile-p-4 rounded-3xl text-white modern-card shadow-2xl fade-in" style="animation-delay: 0.4s">
+        <div class="flex items-center justify-between mobile-grid-1 mobile-space-y-2">
+         <div class="text-center">
+          <p class="text-white opacity-90 text-sm mobile-text-xs font-semibold mb-2 flex items-center justify-center">
+           <svg class="w-4 h-4 ml-2 mobile-hidden" fill="currentColor" viewbox="0 0 20 20"><path fill-rule="evenodd" d="M3 3a1 1 0 000 2v8a2 2 0 002 2h2.586l-1.293 1.293a1 1 0 101.414 1.414L10 15.414l2.293 2.293a1 1 0 001.414-1.414L12.414 15H15a2 2 0 002-2V5a1 1 0 100-2H3z" clip-rule="evenodd" />
+           </svg> نسبة الحضور</p>
+          <p id="attendance-rate" class="text-4xl mobile-text-2xl font-bold stats-counter mb-1">0%</p>
+          <p class="text-purple-100 text-xs">من المجموع</p>
+         </div>
+         <div class="w-16 h-16 bg-white bg-opacity-20 rounded-2xl flex items-center justify-center float-animation mobile-hidden" style="animation-delay: 1.5s">
+          <svg class="w-8 h-8 text-white" fill="currentColor" viewbox="0 0 20 20"><path fill-rule="evenodd" d="M3 3a1 1 0 000 2v8a2 2 0 002 2h2.586l-1.293 1.293a1 1 0 101.414 1.414L10 15.414l2.293 2.293a1 1 0 001.414-1.414L12.414 15H15a2 2 0 002-2V5a1 1 0 100-2H3z" clip-rule="evenodd" />
+          </svg>
+         </div>
+        </div>
+       </div>
+      </div><!-- Quick Actions -->
+      <div class="grid grid-cols-1 md:grid-cols-3 mobile-grid-1 gap-8 mobile-gap-6 mb-12 mobile-mb-4">
+       <div class="glass-card rounded-3xl shadow-2xl p-8 mobile-p-4 modern-card backdrop-blur-xl border border-white border-opacity-20 slide-in" style="animation-delay: 0.1s">
+        <div class="flex items-center mb-6 mobile-mb-4">
+         <div class="w-16 h-16 gradient-primary rounded-2xl flex items-center justify-center ml-6 mobile-ml-4 float-animation">
+          <svg class="w-8 h-8 text-white" fill="currentColor" viewbox="0 0 20 20"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+         </div>
+         <div>
+          <h3 class="text-2xl mobile-text-lg font-bold text-gray-800 mb-1">⚡ تسجيل سريع</h3>
+          <p class="text-blue-600 font-semibold text-sm mobile-text-xs">إجراء فوري</p>
+         </div>
+        </div>
+        <p class="text-gray-600 mb-6 mobile-mb-4 text-lg mobile-text-sm leading-relaxed">سجل حضور الطلاب بسرعة وسهولة مع واجهة تفاعلية متطورة</p><button class="quick-action-btn w-full gradient-primary text-white py-4 mobile-py-3 rounded-2xl font-bold text-lg mobile-text-sm transition-all interactive-btn modern-card shadow-lg touch-btn hover:scale-105" data-section="attendance"> <span class="flex items-center justify-center">
+          <svg class="w-6 h-6 ml-3" fill="currentColor" viewbox="0 0 20 20"><path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd" />
+          </svg> ابدأ التسجيل الآن </span> </button>
+       </div>
+       <div class="glass-card rounded-3xl shadow-2xl p-8 mobile-p-4 modern-card backdrop-blur-xl border border-white border-opacity-20 slide-in" style="animation-delay: 0.2s">
+        <div class="flex items-center mb-6 mobile-mb-4">
+         <div class="w-16 h-16 gradient-success rounded-2xl flex items-center justify-center ml-6 mobile-ml-4 float-animation" style="animation-delay: 0.5s">
+          <svg class="w-8 h-8 text-white" fill="currentColor" viewbox="0 0 20 20"><path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z" /> <path fill-rule="evenodd" d="M4 5a2 2 0 012-2v1a2 2 0 002 2h8a2 2 0 002-2V3a2 2 0 012 2v6h-3a3 3 0 00-3 3v3H6a2 2 0 01-2-2V5z" clip-rule="evenodd" />
+          </svg>
+         </div>
+         <div>
+          <h3 class="text-2xl mobile-text-lg font-bold text-gray-800 mb-1">📊 التقارير</h3>
+          <p class="text-green-600 font-semibold text-sm mobile-text-xs">تحليل شامل</p>
+         </div>
+        </div>
+        <p class="text-gray-600 mb-6 mobile-mb-4 text-lg mobile-text-sm leading-relaxed">اطلع على تقارير الحضور التفصيلية والإحصائيات المتقدمة</p><button class="quick-action-btn w-full gradient-success text-white py-4 mobile-py-3 rounded-2xl font-bold text-lg mobile-text-sm transition-all interactive-btn modern-card shadow-lg touch-btn hover:scale-105" data-section="reports"> <span class="flex items-center justify-center">
+          <svg class="w-6 h-6 ml-3" fill="currentColor" viewbox="0 0 20 20"><path fill-rule="evenodd" d="M3 3a1 1 0 000 2v8a2 2 0 002 2h2.586l-1.293 1.293a1 1 0 101.414 1.414L10 15.414l2.293 2.293a1 1 0 001.414-1.414L12.414 15H15a2 2 0 002-2V5a1 1 0 100-2H3z" clip-rule="evenodd" />
+          </svg> عرض التقارير </span> </button>
+       </div>
+       <div class="glass-card rounded-3xl shadow-2xl p-8 mobile-p-4 modern-card backdrop-blur-xl border border-white border-opacity-20 slide-in" style="animation-delay: 0.3s">
+        <div class="flex items-center mb-6 mobile-mb-4">
+         <div class="w-16 h-16 gradient-purple rounded-2xl flex items-center justify-center ml-6 mobile-ml-4 float-animation" style="animation-delay: 1s">
+          <svg class="w-8 h-8 text-white" fill="currentColor" viewbox="0 0 20 20"><path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3z" />
+          </svg>
+         </div>
+         <div>
+          <h3 class="text-2xl mobile-text-lg font-bold text-gray-800 mb-1">👥 إدارة الطلاب</h3>
+          <p class="text-purple-600 font-semibold text-sm mobile-text-xs">إدارة متكاملة</p>
+         </div>
+        </div>
+        <p class="text-gray-600 mb-6 mobile-mb-4 text-lg mobile-text-sm leading-relaxed">إدارة شاملة لبيانات الطلاب والفرق الدراسية بكفاءة عالية</p><button class="quick-action-btn w-full gradient-purple text-white py-4 mobile-py-3 rounded-2xl font-bold text-lg mobile-text-sm transition-all interactive-btn modern-card shadow-lg touch-btn hover:scale-105" data-section="students"> <span class="flex items-center justify-center">
+          <svg class="w-6 h-6 ml-3" fill="currentColor" viewbox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-6-3a2 2 0 11-4 0 2 2 0 014 0zm-2 4a5 5 0 00-4.546 2.916A5.986 5.986 0 0010 16a5.986 5.986 0 004.546-2.084A5 5 0 0010 11z" clip-rule="evenodd" />
+          </svg> إدارة الطلاب </span> </button>
+       </div>
+      </div><!-- Recent Activity -->
+      <div class="glass-card rounded-3xl shadow-2xl p-8 mobile-p-4 backdrop-blur-xl border border-white border-opacity-20">
+       <div class="flex items-center justify-between mb-8 mobile-mb-4">
+        <div class="flex items-center">
+         <div class="w-12 h-12 gradient-primary rounded-2xl flex items-center justify-center ml-4">
+          <svg class="w-6 h-6 text-white" fill="currentColor" viewbox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd" />
+          </svg>
+         </div>
+         <h3 class="text-3xl mobile-text-lg font-bold text-gray-800">📈 النشاط الأخير</h3>
+        </div>
+        <div class="flex items-center text-gray-500 bg-gray-100 rounded-2xl px-4 py-2 mobile-hidden">
+         <div class="w-3 h-3 bg-green-500 rounded-full animate-pulse ml-2"></div><span class="text-sm font-semibold">مباشر • آخر تحديث: الآن</span>
+        </div>
+       </div>
+       <div id="recent-activity" class="space-y-4 mobile-space-y-2">
+        <div class="flex items-center p-6 mobile-p-4 glass-card rounded-2xl backdrop-blur-sm border border-white border-opacity-30 modern-card">
+         <div class="w-14 h-14 gradient-success rounded-2xl flex items-center justify-center ml-6 mobile-ml-4 float-animation">
+          <svg class="w-7 h-7 text-white" fill="currentColor" viewbox="0 0 20 20"><path d="M10 2L3 7v11a2 2 0 002 2h4v-6h2v6h4a2 2 0 002-2V7l-7-5z" />
+          </svg>
+         </div>
+         <div class="flex-1">
+          <p class="font-bold text-gray-800 text-xl mobile-text-lg mb-2">🎉 مرحباً بك في النظام المتطور!</p>
+          <p class="text-gray-600 text-lg mobile-text-sm">ابدأ بتسجيل حضور الطلاب أو مراجعة التقارير التفصيلية</p>
+         </div>
+         <div class="text-center mobile-hidden"><span class="text-sm text-green-600 font-bold bg-green-100 px-3 py-1 rounded-full">نشط الآن</span>
+          <p class="text-xs text-gray-500 mt-1">منذ لحظات</p>
+         </div>
+        </div>
+       </div>
+      </div>
+     </div><!-- Attendance Section -->
+     <div id="attendance-section" class="section hidden">
+      <div class="bg-white rounded-2xl shadow-lg p-8 mobile-p-4 mb-8 mobile-mb-4 modern-card">
+       <div class="flex items-center mb-8 mobile-mb-4">
+        <div class="w-16 h-16 bg-blue-100 rounded-2xl flex items-center justify-center ml-6 mobile-ml-4">
+         <svg class="w-8 h-8 text-blue-600" fill="currentColor" viewbox="0 0 20 20"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+         </svg>
+        </div>
+        <div>
+         <h2 class="text-3xl mobile-text-xl font-bold text-gray-800 mb-2">تسجيل الحضور والغياب</h2>
+         <p class="text-gray-600 mobile-text-sm">سجل حضور الطلاب بسهولة وسرعة</p>
+        </div>
+       </div><!-- Filters -->
+       <div class="grid grid-cols-1 md:grid-cols-4 mobile-grid-1 gap-6 mobile-gap-4 mb-8 mobile-mb-4">
+        <div class="space-y-2"><label class="block text-sm font-semibold text-gray-700">👨‍🏫 المعلم</label> <select id="teacher-select" class="w-full p-4 mobile-p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all touch-btn"> <option value="">اختر المعلم</option> </select>
+        </div>
+        <div class="space-y-2"><label class="block text-sm font-semibold text-gray-700">📚 المادة</label> <select id="subject-select" class="w-full p-4 mobile-p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all touch-btn"> <option value="">اختر المادة</option> </select>
+        </div>
+        <div class="space-y-2"><label class="block text-sm font-semibold text-gray-700">🎓 الفرقة</label> <select id="group-select" class="w-full p-4 mobile-p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all touch-btn"> <option value="">اختر الفرقة</option> <option value="الفرقة الأولى">الفرقة الأولى</option> <option value="الفرقة الثانية">الفرقة الثانية</option> <option value="الفرقة الثالثة">الفرقة الثالثة</option> <option value="الفرقة الرابعة">الفرقة الرابعة</option> </select>
+        </div>
+        <div class="space-y-2"><label class="block text-sm font-semibold text-gray-700">📅 التاريخ</label> <input type="date" id="date-input" class="w-full p-4 mobile-p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all touch-btn">
+        </div>
+       </div><button id="load-students" class="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 mobile-px-6 py-4 mobile-py-3 rounded-xl hover:from-blue-700 hover:to-purple-700 font-bold text-lg mobile-text-sm mb-8 mobile-mb-4 transition-all transform hover:scale-105 touch-btn"> 📋 تحميل قائمة الطلاب </button> <!-- Students List -->
+       <div id="students-list" class="hidden">
+        <div class="flex justify-between items-center mb-6 mobile-mb-4 mobile-grid-1 mobile-space-y-2">
+         <h3 class="text-2xl mobile-text-lg font-bold text-gray-800">📝 قائمة الطلاب</h3>
+         <div class="flex space-x-reverse space-x-3 mobile-grid-2 mobile-gap-2"><button id="mark-all-present" class="bg-green-600 text-white px-6 mobile-px-4 py-3 mobile-py-2 rounded-xl hover:bg-green-700 font-semibold transition-all touch-btn mobile-text-sm"> ✅ تحديد الكل حاضر </button> <button id="mark-all-absent" class="bg-red-600 text-white px-6 mobile-px-4 py-3 mobile-py-2 rounded-xl hover:bg-red-700 font-semibold transition-all touch-btn mobile-text-sm"> ❌ تحديد الكل غائب </button>
+         </div>
+        </div>
+        <div id="students-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 mobile-grid-1 gap-6 mobile-gap-4 mb-8 mobile-mb-4">
+        </div>
+        <div class="text-center"><button id="save-attendance" class="bg-gradient-to-r from-green-600 to-blue-600 text-white px-12 mobile-px-8 py-4 mobile-py-3 rounded-xl hover:from-green-700 hover:to-blue-700 font-bold text-lg mobile-text-sm transition-all transform hover:scale-105 touch-btn"> 💾 حفظ الحضور والغياب </button>
+        </div>
+       </div><!-- Session Management for Teachers -->
+       <div id="session-management" class="bg-white rounded-2xl shadow-lg p-8 mobile-p-4 mb-8 mobile-mb-4 modern-card hidden">
+        <div class="flex items-center mb-8 mobile-mb-4">
+         <div class="w-16 h-16 bg-green-100 rounded-2xl flex items-center justify-center ml-6 mobile-ml-4">
+          <svg class="w-8 h-8 text-green-600" fill="currentColor" viewbox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd" />
+          </svg>
+         </div>
+         <div>
+          <h3 class="text-3xl mobile-text-xl font-bold text-gray-800 mb-2">⏰ إدارة جلسات الحضور</h3>
+          <p class="text-gray-600 mobile-text-sm">افتح جلسة حضور للطلاب أو أغلق الجلسات النشطة</p>
+         </div>
+        </div><!-- Create New Session -->
+        <div class="bg-gradient-to-br from-blue-50 to-purple-50 rounded-2xl p-8 mobile-p-4 mb-8 mobile-mb-4 border-2 border-blue-200">
+         <h4 class="text-2xl mobile-text-lg font-bold text-gray-800 mb-6 mobile-mb-4 flex items-center">
+          <svg class="w-6 h-6 text-blue-600 ml-3" fill="currentColor" viewbox="0 0 20 20"><path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" />
+          </svg> 🆕 إنشاء جلسة حضور جديدة</h4>
+         <div class="grid grid-cols-1 md:grid-cols-3 mobile-grid-1 gap-6 mobile-gap-4 mb-6 mobile-mb-4">
+          <div class="space-y-2"><label class="block text-sm font-semibold text-gray-700">📚 المادة</label> <select id="session-subject" class="w-full p-4 mobile-p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all touch-btn"> <option value="">اختر المادة</option> </select>
+          </div>
+          <div class="space-y-2"><label class="block text-sm font-semibold text-gray-700">🎓 الفرقة</label> <select id="session-group" class="w-full p-4 mobile-p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all touch-btn"> <option value="">اختر الفرقة</option> <option value="الفرقة الأولى">الفرقة الأولى</option> <option value="الفرقة الثانية">الفرقة الثانية</option> <option value="الفرقة الثالثة">الفرقة الثالثة</option> <option value="الفرقة الرابعة">الفرقة الرابعة</option> </select>
+          </div>
+          <div class="space-y-2"><label class="block text-sm font-semibold text-gray-700">⏱️ مدة الجلسة (دقيقة)</label> <select id="session-duration" class="w-full p-4 mobile-p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all touch-btn"> <option value="15">15 دقيقة</option> <option value="30" selected>30 دقيقة</option> <option value="45">45 دقيقة</option> <option value="60">60 دقيقة</option> <option value="90">90 دقيقة</option> </select>
+          </div>
+         </div>
+         <div class="text-center"><button id="create-session-btn" class="bg-gradient-to-r from-green-600 to-blue-600 text-white px-10 mobile-px-8 py-4 mobile-py-3 rounded-xl hover:from-green-700 hover:to-blue-700 font-bold text-lg mobile-text-sm transition-all transform hover:scale-105 touch-btn">
+           <svg class="w-6 h-6 inline-block ml-3" fill="currentColor" viewbox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd" />
+           </svg> 🚀 بدء جلسة الحضور </button>
+         </div>
+        </div><!-- Active Sessions -->
+        <div id="active-sessions-container">
+         <h4 class="text-2xl mobile-text-lg font-bold text-gray-800 mb-6 mobile-mb-4 flex items-center">
+          <svg class="w-6 h-6 text-green-600 ml-3" fill="currentColor" viewbox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+          </svg> 📡 الجلسات النشطة</h4>
+         <div id="active-sessions-list">
+          <div class="text-center py-8 mobile-py-4 text-gray-500">
+           <svg class="w-16 h-16 mx-auto mb-4 mobile-mb-2 opacity-50" fill="currentColor" viewbox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+           </svg>
+           <p class="text-lg mobile-text-sm font-semibold">لا توجد جلسات نشطة حالياً</p>
+           <p class="text-sm mobile-text-xs mt-2">قم بإنشاء جلسة جديدة لبدء تسجيل الحضور</p>
+          </div>
+         </div>
+        </div>
+       </div>
+      </div>
+     </div><!-- Reports Section -->
+     <div id="reports-section" class="section hidden">
+      <div class="bg-white rounded-2xl shadow-lg p-8 mobile-p-4 modern-card">
+       <div class="flex items-center mb-8 mobile-mb-4">
+        <div class="w-16 h-16 bg-green-100 rounded-2xl flex items-center justify-center ml-6 mobile-ml-4">
+         <svg class="w-8 h-8 text-green-600" fill="currentColor" viewbox="0 0 20 20"><path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z" /> <path fill-rule="evenodd" d="M4 5a2 2 0 012-2v1a2 2 0 002 2h8a2 2 0 002-2V3a2 2 0 012 2v6h-3a3 3 0 00-3 3v3H6a2 2 0 01-2-2V5z" clip-rule="evenodd" />
+         </svg>
+        </div>
+        <div>
+         <h2 class="text-3xl mobile-text-xl font-bold text-gray-800 mb-2">تقارير الحضور والغياب</h2>
+         <p class="text-gray-600 mobile-text-sm">تقارير تفصيلية وإحصائيات شاملة</p>
+        </div>
+       </div><!-- Report Filters -->
+       <div class="grid grid-cols-1 md:grid-cols-3 mobile-grid-1 gap-6 mobile-gap-4 mb-8 mobile-mb-4">
+        <div class="space-y-2"><label class="block text-sm font-semibold text-gray-700">🎓 الفرقة</label> <select id="report-group" class="w-full p-4 mobile-p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all touch-btn"> <option value="">جميع الفرق</option> <option value="الفرقة الأولى">الفرقة الأولى</option> <option value="الفرقة الثانية">الفرقة الثانية</option> <option value="الفرقة الثالثة">الفرقة الثالثة</option> <option value="الفرقة الرابعة">الفرقة الرابعة</option> </select>
+        </div>
+        <div class="space-y-2"><label class="block text-sm font-semibold text-gray-700">📚 المادة</label> <select id="report-subject" class="w-full p-4 mobile-p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all touch-btn"> <option value="">جميع المواد</option> </select>
+        </div>
+        <div class="space-y-2"><label class="block text-sm font-semibold text-gray-700">📅 من تاريخ</label> <input type="date" id="report-date-from" class="w-full p-4 mobile-p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all touch-btn">
+        </div>
+       </div><button id="generate-report" class="bg-gradient-to-r from-green-600 to-blue-600 text-white px-8 mobile-px-6 py-4 mobile-py-3 rounded-xl hover:from-green-700 hover:to-blue-700 font-bold text-lg mobile-text-sm mb-8 mobile-mb-4 transition-all transform hover:scale-105 touch-btn"> 📊 إنشاء التقرير </button>
+       <div id="report-results" class="hidden">
+        <h3 class="text-2xl mobile-text-lg font-bold text-gray-800 mb-6 mobile-mb-4">📈 نتائج التقرير</h3>
+        <div id="report-content" class="responsive-table bg-gray-50 rounded-xl p-4 mobile-p-2">
+        </div>
+       </div>
+      </div>
+     </div><!-- Students Management Section -->
+     <div id="students-section" class="section hidden"><!-- Admin Controls -->
+      <div id="admin-controls" class="hidden"><!-- Management Tabs -->
+       <div class="bg-white rounded-2xl shadow-lg mb-8 mobile-mb-4 modern-card">
+        <div class="flex justify-center border-b border-gray-200">
+         <div class="flex space-x-reverse space-x-2 mobile-overflow-x"><button id="tab-students" class="admin-tab px-8 mobile-px-4 py-4 mobile-py-3 text-blue-600 font-bold bg-blue-50 rounded-t-2xl border-b-2 border-blue-600 touch-btn"> 👥 إدارة الطلاب </button> <button id="tab-teachers" class="admin-tab px-8 mobile-px-4 py-4 mobile-py-3 text-gray-600 hover:text-blue-600 font-semibold hover:bg-gray-50 rounded-t-2xl transition-all touch-btn"> 👨‍🏫 إدارة المعلمين </button> <button id="tab-subjects" class="admin-tab px-8 mobile-px-4 py-4 mobile-py-3 text-gray-600 hover:text-blue-600 font-semibold hover:bg-gray-50 rounded-t-2xl transition-all touch-btn"> 📚 إدارة المواد </button> <button id="tab-attendance-mgmt" class="admin-tab px-8 mobile-px-4 py-4 mobile-py-3 text-gray-600 hover:text-blue-600 font-semibold hover:bg-gray-50 rounded-t-2xl transition-all touch-btn"> 📊 إدارة الحضور </button>
+         </div>
+        </div>
+       </div><!-- Students Management Tab -->
+       <div id="students-tab-content" class="admin-tab-content">
+        <div class="bg-white rounded-2xl shadow-lg p-8 mobile-p-4 mb-8 mobile-mb-4 modern-card">
+         <div class="flex items-center justify-between mb-8 mobile-mb-4">
+          <div class="flex items-center">
+           <div class="w-16 h-16 bg-blue-100 rounded-2xl flex items-center justify-center ml-6 mobile-ml-4">
+            <svg class="w-8 h-8 text-blue-600" fill="currentColor" viewbox="0 0 20 20"><path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" />
+            </svg>
+           </div>
+           <div>
+            <h3 class="text-3xl mobile-text-xl font-bold text-gray-800 mb-2">إضافة طالب جديد</h3>
+            <p class="text-gray-600 mobile-text-sm">أضف طالب جديد إلى النظام</p>
+           </div>
+          </div>
+         </div>
+         <form id="add-student-form" class="grid grid-cols-1 md:grid-cols-3 mobile-grid-1 gap-6 mobile-gap-4">
+          <div class="space-y-2"><label class="block text-sm font-semibold text-gray-700">🆔 رقم الطالب</label> <input type="text" id="student-id" class="w-full p-4 mobile-p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all touch-btn" placeholder="مثال: S025" required>
+          </div>
+          <div class="space-y-2"><label class="block text-sm font-semibold text-gray-700">👤 اسم الطالب</label> <input type="text" id="student-name" class="w-full p-4 mobile-p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all touch-btn" placeholder="الاسم الكامل" required>
+          </div>
+          <div class="space-y-2"><label class="block text-sm font-semibold text-gray-700">🎓 الفرقة</label> <select id="student-group" class="w-full p-4 mobile-p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all touch-btn" required> <option value="">اختر الفرقة</option> <option value="الفرقة الأولى">الفرقة الأولى</option> <option value="الفرقة الثانية">الفرقة الثانية</option> <option value="الفرقة الثالثة">الفرقة الثالثة</option> <option value="الفرقة الرابعة">الفرقة الرابعة</option> </select>
+          </div>
+          <div class="md:col-span-3 text-center"><button type="submit" class="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 mobile-px-6 py-4 mobile-py-3 rounded-xl hover:from-blue-700 hover:to-purple-700 font-bold text-lg mobile-text-sm transition-all transform hover:scale-105 touch-btn"> ➕ إضافة الطالب </button>
+          </div>
+         </form>
+        </div>
+       </div><!-- Teachers Management Tab -->
+       <div id="teachers-tab-content" class="admin-tab-content hidden">
+        <div class="bg-white rounded-2xl shadow-lg p-8 mobile-p-4 mb-8 mobile-mb-4 modern-card">
+         <div class="flex items-center justify-between mb-8 mobile-mb-4">
+          <div class="flex items-center">
+           <div class="w-16 h-16 bg-green-100 rounded-2xl flex items-center justify-center ml-6 mobile-ml-4">
+            <svg class="w-8 h-8 text-green-600" fill="currentColor" viewbox="0 0 20 20"><path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" />
+            </svg>
+           </div>
+           <div>
+            <h3 class="text-3xl mobile-text-xl font-bold text-gray-800 mb-2">إضافة معلم جديد</h3>
+            <p class="text-gray-600 mobile-text-sm">أضف معلم جديد وحدد المواد التي يدرسها</p>
+           </div>
+          </div>
+         </div>
+         <form id="add-teacher-form" class="space-y-6 mobile-space-y-4">
+          <div class="grid grid-cols-1 md:grid-cols-2 mobile-grid-1 gap-6 mobile-gap-4">
+           <div class="space-y-2"><label class="block text-sm font-semibold text-gray-700">👨‍🏫 اسم المعلم</label> <input type="text" id="teacher-name" class="w-full p-4 mobile-p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all touch-btn" placeholder="د. اسم المعلم" required>
+           </div>
+           <div class="space-y-2"><label class="block text-sm font-semibold text-gray-700">📚 المواد التي يدرسها</label>
+            <div id="teacher-subjects" class="grid grid-cols-2 mobile-grid-1 gap-2 p-4 mobile-p-3 border border-gray-300 rounded-xl bg-gray-50"><!-- Will be populated dynamically -->
+            </div>
+           </div>
+          </div>
+          <div class="text-center"><button type="submit" class="bg-gradient-to-r from-green-600 to-blue-600 text-white px-8 mobile-px-6 py-4 mobile-py-3 rounded-xl hover:from-green-700 hover:to-blue-700 font-bold text-lg mobile-text-sm transition-all transform hover:scale-105 touch-btn"> ➕ إضافة المعلم </button>
+          </div>
+         </form>
+        </div><!-- Teachers List -->
+        <div class="bg-white rounded-2xl shadow-lg p-8 mobile-p-4 modern-card">
+         <h4 class="text-2xl mobile-text-lg font-bold text-gray-800 mb-6 mobile-mb-4">📋 قائمة المعلمين</h4>
+         <div id="teachers-list" class="responsive-table bg-gray-50 rounded-xl p-4 mobile-p-2">
+         </div>
+        </div>
+       </div><!-- Subjects Management Tab -->
+       <div id="subjects-tab-content" class="admin-tab-content hidden">
+        <div class="bg-white rounded-2xl shadow-lg p-8 mobile-p-4 mb-8 mobile-mb-4 modern-card">
+         <div class="flex items-center justify-between mb-8 mobile-mb-4">
+          <div class="flex items-center">
+           <div class="w-16 h-16 bg-purple-100 rounded-2xl flex items-center justify-center ml-6 mobile-ml-4">
+            <svg class="w-8 h-8 text-purple-600" fill="currentColor" viewbox="0 0 20 20"><path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" />
+            </svg>
+           </div>
+           <div>
+            <h3 class="text-3xl mobile-text-xl font-bold text-gray-800 mb-2">إضافة مادة جديدة</h3>
+            <p class="text-gray-600 mobile-text-sm">أضف مادة دراسية جديدة إلى النظام</p>
+           </div>
+          </div>
+         </div>
+         <form id="add-subject-form" class="grid grid-cols-1 md:grid-cols-2 mobile-grid-1 gap-6 mobile-gap-4">
+          <div class="space-y-2"><label class="block text-sm font-semibold text-gray-700">📚 اسم المادة</label> <input type="text" id="subject-name" class="w-full p-4 mobile-p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all touch-btn" placeholder="اسم المادة الدراسية" required>
+          </div>
+          <div class="text-center flex items-end"><button type="submit" class="w-full bg-gradient-to-r from-purple-600 to-blue-600 text-white px-8 mobile-px-6 py-4 mobile-py-3 rounded-xl hover:from-purple-700 hover:to-blue-700 font-bold text-lg mobile-text-sm transition-all transform hover:scale-105 touch-btn"> ➕ إضافة المادة </button>
+          </div>
+         </form>
+        </div><!-- Subjects List -->
+        <div class="bg-white rounded-2xl shadow-lg p-8 mobile-p-4 modern-card">
+         <h4 class="text-2xl mobile-text-lg font-bold text-gray-800 mb-6 mobile-mb-4">📋 قائمة المواد</h4>
+         <div id="subjects-list" class="grid grid-cols-1 md:grid-cols-3 mobile-grid-1 gap-4 mobile-gap-2">
+         </div>
+        </div>
+       </div><!-- Attendance Management Tab -->
+       <div id="attendance-mgmt-tab-content" class="admin-tab-content hidden">
+        <div class="bg-white rounded-2xl shadow-lg p-8 mobile-p-4 mb-8 mobile-mb-4 modern-card">
+         <div class="flex items-center mb-8 mobile-mb-4">
+          <div class="w-16 h-16 bg-red-100 rounded-2xl flex items-center justify-center ml-6 mobile-ml-4">
+           <svg class="w-8 h-8 text-red-600" fill="currentColor" viewbox="0 0 20 20"><path fill-rule="evenodd" d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z" /> <path fill-rule="evenodd" d="M4 5a2 2 0 012-2v1a2 2 0 002 2h8a2 2 0 002-2V3a2 2 0 012 2v6h-3a3 3 0 00-3 3v3H6a2 2 0 01-2-2V5z" clip-rule="evenodd" />
+           </svg>
+          </div>
+          <div>
+           <h3 class="text-3xl mobile-text-xl font-bold text-gray-800 mb-2">إدارة سجلات الحضور</h3>
+           <p class="text-gray-600 mobile-text-sm">تعديل وحذف سجلات الحضور والغياب</p>
+          </div>
+         </div><!-- Search and Filter -->
+         <div class="grid grid-cols-1 md:grid-cols-4 mobile-grid-1 gap-6 mobile-gap-4 mb-8 mobile-mb-4">
+          <div class="space-y-2"><label class="block text-sm font-semibold text-gray-700">👤 الطالب</label> <select id="filter-student" class="w-full p-4 mobile-p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-all touch-btn"> <option value="">جميع الطلاب</option> </select>
+          </div>
+          <div class="space-y-2"><label class="block text-sm font-semibold text-gray-700">📚 المادة</label> <select id="filter-subject-mgmt" class="w-full p-4 mobile-p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-all touch-btn"> <option value="">جميع المواد</option> </select>
+          </div>
+          <div class="space-y-2"><label class="block text-sm font-semibold text-gray-700">📅 التاريخ</label> <input type="date" id="filter-date" class="w-full p-4 mobile-p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-all touch-btn">
+          </div>
+          <div class="flex items-end"><button id="filter-attendance" class="w-full bg-gradient-to-r from-red-600 to-purple-600 text-white px-6 mobile-px-4 py-4 mobile-py-3 rounded-xl hover:from-red-700 hover:to-purple-700 font-bold text-lg mobile-text-sm transition-all transform hover:scale-105 touch-btn"> 🔍 بحث </button>
+          </div>
+         </div>
+        </div><!-- Attendance Records -->
+        <div class="bg-white rounded-2xl shadow-lg p-8 mobile-p-4 modern-card">
+         <h4 class="text-2xl mobile-text-lg font-bold text-gray-800 mb-6 mobile-mb-4">📊 سجلات الحضور</h4>
+         <div id="attendance-records-list" class="responsive-table bg-gray-50 rounded-xl p-4 mobile-p-2">
+         </div>
+        </div>
+       </div>
+      </div><!-- Regular Students View (for Teachers and non-admin users) -->
+      <div id="regular-students-view">
+       <div class="bg-white rounded-2xl shadow-lg p-8 mobile-p-4 modern-card">
+        <div class="flex items-center mb-8 mobile-mb-4">
+         <div class="w-16 h-16 bg-purple-100 rounded-2xl flex items-center justify-center ml-6 mobile-ml-4">
+          <svg class="w-8 h-8 text-purple-600" fill="currentColor" viewbox="0 0 20 20"><path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3z" />
+          </svg>
+         </div>
+         <div>
+          <h2 class="text-3xl mobile-text-xl font-bold text-gray-800 mb-2">إدارة الطلاب</h2>
+          <p class="text-gray-600 mobile-text-sm">إدارة شاملة لبيانات الطلاب والفرق الدراسية</p>
+         </div>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-4 mobile-grid-2 gap-6 mobile-gap-4 mb-8 mobile-mb-4">
+         <div class="gradient-primary p-8 mobile-p-4 rounded-2xl text-center text-white modern-card">
+          <div class="w-16 h-16 bg-white bg-opacity-20 rounded-2xl flex items-center justify-center mx-auto mb-4 mobile-mb-2"><span class="text-2xl mobile-text-lg font-bold">1️⃣</span>
+          </div>
+          <h3 class="text-xl mobile-text-lg font-bold mb-3 mobile-mb-2">الفرقة الأولى</h3>
+          <p id="group1-count" class="text-4xl mobile-text-2xl font-bold mb-2 stats-counter">0</p>
+          <p class="text-blue-100 mobile-text-xs">طالب مسجل</p>
+         </div>
+         <div class="gradient-success p-8 mobile-p-4 rounded-2xl text-center text-white modern-card">
+          <div class="w-16 h-16 bg-white bg-opacity-20 rounded-2xl flex items-center justify-center mx-auto mb-4 mobile-mb-2"><span class="text-2xl mobile-text-lg font-bold">2️⃣</span>
+          </div>
+          <h3 class="text-xl mobile-text-lg font-bold mb-3 mobile-mb-2">الفرقة الثانية</h3>
+          <p id="group2-count" class="text-4xl mobile-text-2xl font-bold mb-2 stats-counter">0</p>
+          <p class="text-green-100 mobile-text-xs">طالب مسجل</p>
+         </div>
+         <div class="gradient-warning p-8 mobile-p-4 rounded-2xl text-center text-white modern-card">
+          <div class="w-16 h-16 bg-white bg-opacity-20 rounded-2xl flex items-center justify-center mx-auto mb-4 mobile-mb-2"><span class="text-2xl mobile-text-lg font-bold">3️⃣</span>
+          </div>
+          <h3 class="text-xl mobile-text-lg font-bold mb-3 mobile-mb-2">الفرقة الثالثة</h3>
+          <p id="group3-count" class="text-4xl mobile-text-2xl font-bold mb-2 stats-counter">0</p>
+          <p class="text-yellow-100 mobile-text-xs">طالب مسجل</p>
+         </div>
+         <div class="gradient-purple p-8 mobile-p-4 rounded-2xl text-center text-white modern-card">
+          <div class="w-16 h-16 bg-white bg-opacity-20 rounded-2xl flex items-center justify-center mx-auto mb-4 mobile-mb-2"><span class="text-2xl mobile-text-lg font-bold">4️⃣</span>
+          </div>
+          <h3 class="text-xl mobile-text-lg font-bold mb-3 mobile-mb-2">الفرقة الرابعة</h3>
+          <p id="group4-count" class="text-4xl mobile-text-2xl font-bold mb-2 stats-counter">0</p>
+          <p class="text-purple-100 mobile-text-xs">طالب مسجل</p>
+         </div>
+        </div>
+        <div>
+         <h3 class="text-2xl mobile-text-lg font-bold text-gray-800 mb-6 mobile-mb-4">📋 قائمة جميع الطلاب</h3>
+         <div id="all-students-list" class="responsive-table bg-gray-50 rounded-xl p-4 mobile-p-2">
+         </div>
+        </div>
+       </div>
+      </div>
+     </div><!-- Student Personal View -->
+     <div id="student-view-section" class="section hidden"><!-- Student Header -->
+      <div class="gradient-ocean rounded-2xl shadow-2xl p-8 mobile-p-4 mb-8 mobile-mb-4 text-white text-center">
+       <div class="mb-6 mobile-mb-4">
+        <div class="w-24 h-24 bg-white bg-opacity-20 rounded-full flex items-center justify-center mx-auto mb-4 mobile-mb-2 bounce-in">
+         <svg class="w-12 h-12" fill="currentColor" viewbox="0 0 20 20"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
+         </svg>
+        </div>
+        <h2 class="text-4xl mobile-text-2xl font-bold mb-2">🎓 حضوري الشخصي</h2>
+        <p class="text-xl mobile-text-lg opacity-90">مرحباً <strong id="student-welcome-name"></strong></p>
+        <p class="text-lg mobile-text-sm opacity-80 mt-2">رقم الطالب: <strong id="student-id-display"></strong></p>
+       </div>
+      </div><!-- Available Sessions for Check-in -->
+      <div id="available-sessions" class="bg-gradient-to-br from-green-50 to-blue-50 rounded-2xl p-8 mobile-p-4 mb-8 mobile-mb-4 border-2 border-green-200">
+       <h4 class="text-2xl mobile-text-lg font-bold text-gray-800 mb-6 mobile-mb-4 text-center flex items-center justify-center">
+        <svg class="w-6 h-6 ml-3 text-green-600" fill="currentColor" viewbox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd" />
+        </svg> 📡 الجلسات المتاحة لتسجيل الحضور</h4><!-- Important Notice -->
+       <div class="bg-yellow-100 border-2 border-yellow-300 rounded-xl p-4 mobile-p-2 mb-6 mobile-mb-4">
+        <div class="flex items-center justify-center mb-2">
+         <div class="w-8 h-8 bg-yellow-400 rounded-full flex items-center justify-center ml-3">
+          <svg class="w-4 h-4 text-yellow-800" fill="currentColor" viewbox="0 0 20 20"><path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+          </svg>
+         </div>
+         <h5 class="text-lg mobile-text-sm font-bold text-yellow-800">⚠️ تنبيه مهم</h5>
+        </div>
+        <p class="text-yellow-800 text-sm mobile-text-xs text-center">🔒 يمكنك تسجيل الحضور فقط عند فتح المعلم لجلسة نشطة لفرقتك</p>
+       </div>
+       <div id="student-sessions-list">
+        <div class="text-center py-8 mobile-py-4 text-gray-500">
+         <svg class="w-16 h-16 mx-auto mb-4 mobile-mb-2 opacity-50" fill="currentColor" viewbox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+         </svg>
+         <p class="text-lg mobile-text-sm font-semibold">🔒 لا توجد جلسات حضور نشطة حالياً</p>
+         <p class="text-sm mobile-text-xs mt-2 opacity-80">انتظر حتى يفتح أحد المعلمين جلسة حضور لفرقتك</p>
+        </div>
+       </div>
+       <div id="checkin-status" class="hidden mt-4">
+       </div>
+      </div><!-- Statistics Cards -->
+      <div class="grid grid-cols-1 md:grid-cols-3 mobile-grid-1 gap-6 mobile-gap-4 mb-8 mobile-mb-4">
+       <div class="bg-white rounded-2xl shadow-lg p-6 mobile-p-4 border-r-4 border-green-500 modern-card">
+        <div class="flex items-center mobile-grid-1 mobile-space-y-2">
+         <div class="flex-shrink-0">
+          <div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
+           <svg class="w-6 h-6 text-green-600" fill="currentColor" viewbox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+           </svg>
+          </div>
+         </div>
+         <div class="mr-4 mobile-mr-0 text-center">
+          <h3 class="text-lg mobile-text-sm font-bold text-gray-800 mb-1">✅ أيام الحضور</h3>
+          <p id="student-present-count" class="text-3xl mobile-text-xl font-bold text-green-600 stats-counter">0</p>
+          <p class="text-gray-500 text-xs">يوم</p>
+         </div>
+        </div>
+       </div>
+       <div class="bg-white rounded-2xl shadow-lg p-6 mobile-p-4 border-r-4 border-red-500 modern-card">
+        <div class="flex items-center mobile-grid-1 mobile-space-y-2">
+         <div class="flex-shrink-0">
+          <div class="w-12 h-12 bg-red-100 rounded-xl flex items-center justify-center">
+           <svg class="w-6 h-6 text-red-600" fill="currentColor" viewbox="0 0 20 20"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+           </svg>
+          </div>
+         </div>
+         <div class="mr-4 mobile-mr-0 text-center">
+          <h3 class="text-lg mobile-text-sm font-bold text-gray-800 mb-1">❌ أيام الغياب</h3>
+          <p id="student-absent-count" class="text-3xl mobile-text-xl font-bold text-red-600 stats-counter">0</p>
+          <p class="text-gray-500 text-xs">يوم</p>
+         </div>
+        </div>
+       </div>
+       <div class="bg-white rounded-2xl shadow-lg p-6 mobile-p-4 border-r-4 border-blue-500 modern-card">
+        <div class="flex items-center mobile-grid-1 mobile-space-y-2">
+         <div class="flex-shrink-0">
+          <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
+           <svg class="w-6 h-6 text-blue-600" fill="currentColor" viewbox="0 0 20 20"><path fill-rule="evenodd" d="M3 3a1 1 0 000 2v8a2 2 0 002 2h2.586l-1.293 1.293a1 1 0 101.414 1.414L10 15.414l2.293 2.293a1 1 0 001.414-1.414L12.414 15H15a2 2 0 002-2V5a1 1 0 100-2H3z" clip-rule="evenodd" />
+           </svg>
+          </div>
+         </div>
+         <div class="mr-4 mobile-mr-0 text-center">
+          <h3 class="text-lg mobile-text-sm font-bold text-gray-800 mb-1">📊 نسبة الحضور</h3>
+          <p id="student-attendance-rate" class="text-3xl mobile-text-xl font-bold text-blue-600 stats-counter">0%</p>
+          <p class="text-gray-500 text-xs">من المجموع</p>
+         </div>
+        </div>
+       </div>
+      </div><!-- Attendance History -->
+      <div class="bg-white rounded-2xl shadow-lg p-6 mobile-p-4">
+       <div class="flex items-center justify-between mb-6 mobile-mb-4">
+        <h3 class="text-2xl mobile-text-lg font-bold text-gray-800">📋 سجل حضوري وغيابي</h3>
+        <div class="flex items-center space-x-reverse space-x-2 text-gray-500 mobile-hidden">
+         <svg class="w-5 h-5" fill="currentColor" viewbox="0 0 20 20"><path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1z" clip-rule="evenodd" />
+         </svg><span class="text-sm font-semibold">سجل شامل</span>
+        </div>
+       </div>
+       <div id="student-attendance-details" class="responsive-table bg-gray-50 rounded-xl p-4 mobile-p-2">
+       </div>
+      </div>
+     </div>
+    </main>
+   </div>
+  </div>
+  <script>
+        // Sample data
+        const sampleStudents = [
+            // الفرقة الأولى
+            { id: 'S001', name: 'أحمد محمد علي', group: 'الفرقة الأولى' },
+            { id: 'S002', name: 'فاطمة أحمد حسن', group: 'الفرقة الأولى' },
+            { id: 'S003', name: 'محمد عبد الله', group: 'الفرقة الأولى' },
+            { id: 'S004', name: 'نور الهدى محمود', group: 'الفرقة الأولى' },
+            { id: 'S005', name: 'عمر سعد الدين', group: 'الفرقة الأولى' },
+            { id: 'S006', name: 'مريم عبد الرحمن', group: 'الفرقة الأولى' },
+            
+            // الفرقة الثانية
+            { id: 'S007', name: 'خالد إبراهيم', group: 'الفرقة الثانية' },
+            { id: 'S008', name: 'سارة محمد', group: 'الفرقة الثانية' },
+            { id: 'S009', name: 'يوسف أحمد', group: 'الفرقة الثانية' },
+            { id: 'S010', name: 'هدى عبد العزيز', group: 'الفرقة الثانية' },
+            { id: 'S011', name: 'طارق محمود', group: 'الفرقة الثانية' },
+            { id: 'S012', name: 'ليلى حسام', group: 'الفرقة الثانية' },
+            
+            // الفرقة الثالثة
+            { id: 'S013', name: 'حسام الدين علي', group: 'الفرقة الثالثة' },
+            { id: 'S014', name: 'رانيا محمد', group: 'الفرقة الثالثة' },
+            { id: 'S015', name: 'كريم عبد الله', group: 'الفرقة الثالثة' },
+            { id: 'S016', name: 'دينا أحمد', group: 'الفرقة الثالثة' },
+            { id: 'S017', name: 'مصطفى حسن', group: 'الفرقة الثالثة' },
+            { id: 'S018', name: 'ندى سامي', group: 'الفرقة الثالثة' },
+            
+            // الفرقة الرابعة
+            { id: 'S019', name: 'عبد الرحمن محمد', group: 'الفرقة الرابعة' },
+            { id: 'S020', name: 'إسراء عبد الله', group: 'الفرقة الرابعة' },
+            { id: 'S021', name: 'أمير حسام', group: 'الفرقة الرابعة' },
+            { id: 'S022', name: 'شيماء أحمد', group: 'الفرقة الرابعة' },
+            { id: 'S023', name: 'وائل محمود', group: 'الفرقة الرابعة' },
+            { id: 'S024', name: 'منى عبد العزيز', group: 'الفرقة الرابعة' }
+        ];
+
+        const sampleTeachers = [
+            { name: 'د. محمد أحمد', subjects: ['الرياضيات', 'الفيزياء'] },
+            { name: 'د. فاطمة علي', subjects: ['الكيمياء', 'الأحياء'] },
+            { name: 'د. أحمد حسن', subjects: ['الهندسة', 'الرسم الهندسي'] },
+            { name: 'د. نور محمود', subjects: ['اللغة العربية', 'التاريخ'] },
+            { name: 'د. عمر سعد', subjects: ['الجغرافيا', 'الاقتصاد'] }
+        ];
+
+        const allSubjects = ['الرياضيات', 'الفيزياء', 'الكيمياء', 'الأحياء', 'الهندسة', 'الرسم الهندسي', 'اللغة العربية', 'التاريخ', 'الجغرافيا', 'الاقتصاد'];
+
+        // Demo users
+        const demoUsers = {
+            'admin': { password: 'admin123', name: 'مدير النظام', type: 'إدارة النظام', role: 'admin', avatar: '🔧' },
+            'teacher': { password: 'teacher123', name: 'د. محمد أحمد', type: 'معلم', role: 'teacher', avatar: '👨‍🏫' },
+            'student': { password: 'student123', name: 'أحمد محمد علي', type: 'طالب', role: 'student', studentId: 'S001', avatar: '🎓' }
+        };
+
+        // Global variables
+        let currentAttendanceData = [];
+        let attendanceRecords = [];
+        let attendanceSessions = [];
+        let isLoading = false;
+        let currentUser = null;
+        let dynamicStudents = [...sampleStudents];
+        let dynamicTeachers = [...sampleTeachers];
+        let dynamicSubjects = [...allSubjects];
+
+        // Default config
+        const defaultConfig = {
+            system_title: 'نظام إدارة الحضور المتطور',
+            college_name: 'كلية الهندسة - جامعة القاهرة',
+            primary_color: '#1e40af',
+            secondary_color: '#ffffff',
+            text_color: '#1f2937',
+            success_color: '#059669',
+            danger_color: '#dc2626'
+        };
+
+        // Data handler
+        const dataHandler = {
+            onDataChanged(data) {
+                const allData = data || [];
+                
+                // Separate attendance records and sessions
+                attendanceRecords = allData.filter(record => record.type === 'attendance');
+                attendanceSessions = allData.filter(record => record.type === 'session');
+                
+                updateDashboardStats();
+                if (!document.getElementById('reports-section').classList.contains('hidden')) {
+                    updateReports();
+                }
+                if (!document.getElementById('student-view-section').classList.contains('hidden')) {
+                    updateStudentView();
+                }
+                updateRecentActivity();
+                updateActiveSessionsDisplay();
+                updateStudentSessionsDisplay();
+            }
+        };
+
+        // Element SDK implementation
+        const element = {
+            defaultConfig,
+            onConfigChange: async (config) => {
+                const systemTitle = config.system_title || defaultConfig.system_title;
+                const collegeName = config.college_name || defaultConfig.college_name;
+                const primaryColor = config.primary_color || defaultConfig.primary_color;
+                const successColor = config.success_color || defaultConfig.success_color;
+                const dangerColor = config.danger_color || defaultConfig.danger_color;
+
+                document.getElementById('system-title').textContent = systemTitle;
+                document.getElementById('college-name').textContent = collegeName;
+
+                // Apply colors
+                const header = document.querySelector('header');
+                if (header) header.style.background = `linear-gradient(to right, ${primaryColor}, #7c3aed)`;
+            },
+            mapToCapabilities: (config) => ({
+                recolorables: [
+                    {
+                        get: () => config.primary_color || defaultConfig.primary_color,
+                        set: (value) => {
+                            if (window.elementSdk) {
+                                window.elementSdk.setConfig({ primary_color: value });
+                            }
+                        }
+                    },
+                    {
+                        get: () => config.success_color || defaultConfig.success_color,
+                        set: (value) => {
+                            if (window.elementSdk) {
+                                window.elementSdk.setConfig({ success_color: value });
+                            }
+                        }
+                    },
+                    {
+                        get: () => config.danger_color || defaultConfig.danger_color,
+                        set: (value) => {
+                            if (window.elementSdk) {
+                                window.elementSdk.setConfig({ danger_color: value });
+                            }
+                        }
+                    }
+                ],
+                borderables: [],
+                fontEditable: undefined,
+                fontSizeable: undefined
+            }),
+            mapToEditPanelValues: (config) => new Map([
+                ['system_title', config.system_title || defaultConfig.system_title],
+                ['college_name', config.college_name || defaultConfig.college_name]
+            ])
+        };
+
+        // Initialize app
+        async function initApp() {
+            setupLoginForm();
+            
+            try {
+                // Initialize Data SDK if available
+                if (window.dataSdk && typeof window.dataSdk.init === 'function') {
+                    const result = await window.dataSdk.init(dataHandler);
+                    if (!result.isOk) {
+                        console.error('Failed to initialize data SDK');
+                    }
+                } else {
+                    console.log('Data SDK not available - running in standalone mode');
+                    // Initialize with empty data for standalone mode
+                    dataHandler.onDataChanged([]);
+                }
+                
+                // Initialize Element SDK if available
+                if (window.elementSdk && typeof window.elementSdk.init === 'function') {
+                    window.elementSdk.init(element);
+                } else {
+                    console.log('Element SDK not available - using default config');
+                    // Apply default config for standalone mode
+                    element.onConfigChange(defaultConfig);
+                }
+            } catch (error) {
+                console.error('SDK initialization error:', error);
+                // Fallback for standalone mode
+                dataHandler.onDataChanged([]);
+                element.onConfigChange(defaultConfig);
+            }
+        }
+
+        function setupLoginForm() {
+            const loginForm = document.getElementById('login-form');
+            const logoutBtn = document.getElementById('logout-btn');
+
+            loginForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                handleLogin();
+            });
+
+            if (logoutBtn) {
+                logoutBtn.addEventListener('click', handleLogout);
+            }
+        }
+
+        function handleLogin() {
+            const userType = document.getElementById('user-type').value;
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value;
+            const errorDiv = document.getElementById('login-error');
+
+            errorDiv.classList.add('hidden');
+
+            if (!userType || !username || !password) {
+                showLoginError('يرجى ملء جميع الحقول');
+                return;
+            }
+
+            const user = demoUsers[username];
+            if (!user || user.password !== password) {
+                showLoginError('اسم المستخدم أو كلمة المرور غير صحيحة');
+                return;
+            }
+
+            if ((userType === 'admin' && user.role !== 'admin') ||
+                (userType === 'teacher' && user.role !== 'teacher') ||
+                (userType === 'student' && user.role !== 'student')) {
+                showLoginError('نوع المستخدم غير متطابق مع البيانات المدخلة');
+                return;
+            }
+
+            currentUser = user;
+            showWelcomeScreen();
+        }
+
+        function showLoginError(message) {
+            const errorDiv = document.getElementById('login-error');
+            errorDiv.textContent = message;
+            errorDiv.classList.remove('hidden');
+        }
+
+        function showWelcomeScreen() {
+            document.getElementById('login-screen').classList.add('hidden');
+            document.getElementById('welcome-screen').classList.remove('hidden');
+            
+            // Set welcome message
+            const welcomeMessage = document.getElementById('welcome-message');
+            const roleMessages = {
+                'admin': 'مرحباً بك في لوحة تحكم الإدارة 🔧',
+                'teacher': 'مرحباً بك أستاذنا الفاضل 👨‍🏫',
+                'student': 'مرحباً بك عزيزي الطالب 🎓'
+            };
+            welcomeMessage.textContent = roleMessages[currentUser.role] || 'مرحباً بك';
+            
+            // Show main app after 3 seconds
+            setTimeout(() => {
+                showMainApp();
+            }, 3000);
+        }
+
+        function showMainApp() {
+            document.getElementById('welcome-screen').classList.add('hidden');
+            document.getElementById('main-app').classList.remove('hidden');
+
+            // Update user info
+            document.getElementById('logged-user-name').textContent = currentUser.name;
+            document.getElementById('logged-user-type').textContent = currentUser.type;
+            document.getElementById('user-avatar').textContent = currentUser.avatar;
+
+            setupMainApp();
+        }
+
+        function setupMainApp() {
+            document.getElementById('date-input').valueAsDate = new Date();
+            document.getElementById('report-date-from').valueAsDate = new Date();
+            
+            const today = new Date().toLocaleDateString('ar-EG', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+                weekday: 'long'
+            });
+            const currentDateElement = document.getElementById('current-date');
+            if (currentDateElement) {
+                currentDateElement.textContent = today;
+            }
+
+            populateTeachers();
+            populateSubjects();
+            populateStudentSelects();
+            setupEventListeners();
+            configureUIForUserRole();
+            updateStudentCounts();
+            displayAllStudents();
+            updateDashboardStats();
+        }
+
+        function configureUIForUserRole() {
+            const studentViewNav = document.getElementById('nav-student-view');
+            const sessionManagement = document.getElementById('session-management');
+            const adminControls = document.getElementById('admin-controls');
+            const regularStudentsView = document.getElementById('regular-students-view');
+
+            if (currentUser.role === 'student') {
+                // Hide all navigation except student view
+                document.getElementById('nav-dashboard').classList.add('hidden');
+                document.getElementById('nav-attendance').classList.add('hidden');
+                document.getElementById('nav-reports').classList.add('hidden');
+                document.getElementById('nav-students').classList.add('hidden');
+                
+                studentViewNav.classList.remove('hidden');
+                studentViewNav.classList.add('text-blue-600', 'bg-blue-50', 'active');
+                switchSection('student-view');
+            } else {
+                studentViewNav.classList.add('hidden');
+                
+                // Show session management for teachers
+                if (currentUser.role === 'teacher') {
+                    sessionManagement.classList.remove('hidden');
+                    populateSessionSubjects();
+                }
+                
+                // Show admin controls for admin users
+                if (currentUser.role === 'admin') {
+                    adminControls.classList.remove('hidden');
+                    regularStudentsView.classList.add('hidden');
+                    setupAdminTabs();
+                    populateAdminData();
+                } else {
+                    adminControls.classList.add('hidden');
+                    regularStudentsView.classList.remove('hidden');
+                }
+                
+                switchSection('dashboard');
+            }
+        }
+
+        function handleLogout() {
+            currentUser = null;
+            document.getElementById('main-app').classList.add('hidden');
+            document.getElementById('login-screen').classList.remove('hidden');
+            
+            document.getElementById('login-form').reset();
+            document.getElementById('login-error').classList.add('hidden');
+        }
+
+        function populateTeachers() {
+            const teacherSelect = document.getElementById('teacher-select');
+            
+            // Clear existing options
+            teacherSelect.innerHTML = '<option value="">اختر المعلم</option>';
+            
+            // For teachers, only show themselves
+            if (currentUser && currentUser.role === 'teacher') {
+                const option = document.createElement('option');
+                option.value = currentUser.name;
+                option.textContent = currentUser.name;
+                option.selected = true;
+                teacherSelect.appendChild(option);
+                teacherSelect.disabled = true; // Disable selection for teachers
+            } else {
+                // For admin, show all teachers
+                dynamicTeachers.forEach(teacher => {
+                    const option = document.createElement('option');
+                    option.value = teacher.name;
+                    option.textContent = teacher.name;
+                    teacherSelect.appendChild(option);
+                });
+            }
+        }
+
+        function populateSubjects() {
+            const subjectSelects = [
+                document.getElementById('subject-select'),
+                document.getElementById('report-subject')
+            ];
+            
+            subjectSelects.forEach(select => {
+                if (select) {
+                    // Clear existing options
+                    select.innerHTML = '<option value="">اختر المادة</option>';
+                    
+                    // For teachers, only show their subjects
+                    if (currentUser && currentUser.role === 'teacher') {
+                        const teacher = dynamicTeachers.find(t => t.name === currentUser.name);
+                        if (teacher) {
+                            teacher.subjects.forEach(subject => {
+                                const option = document.createElement('option');
+                                option.value = subject;
+                                option.textContent = subject;
+                                select.appendChild(option);
+                            });
+                        }
+                    } else {
+                        // For admin, show all subjects
+                        dynamicSubjects.forEach(subject => {
+                            const option = document.createElement('option');
+                            option.value = subject;
+                            option.textContent = subject;
+                            select.appendChild(option);
+                        });
+                    }
+                }
+            });
+        }
+
+        function populateStudentSelects() {
+            const studentSubjectSelect = document.getElementById('student-subject-select');
+            if (studentSubjectSelect) {
+                allSubjects.forEach(subject => {
+                    const option = document.createElement('option');
+                    option.value = subject;
+                    option.textContent = subject;
+                    option.className = 'text-gray-800';
+                    studentSubjectSelect.appendChild(option);
+                });
+            }
+
+            const studentTeacherSelect = document.getElementById('student-teacher-select');
+            if (studentTeacherSelect) {
+                sampleTeachers.forEach(teacher => {
+                    const option = document.createElement('option');
+                    option.value = teacher.name;
+                    option.textContent = teacher.name;
+                    option.className = 'text-gray-800';
+                    studentTeacherSelect.appendChild(option);
+                });
+            }
+        }
+
+        function setupEventListeners() {
+            // Navigation buttons
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const btnElement = e.target.closest('.nav-btn');
+                    if (btnElement && btnElement.id) {
+                        const target = btnElement.id.replace('nav-', '');
+                        switchSection(target);
+                    }
+                });
+            });
+
+            // Quick action buttons
+            document.querySelectorAll('.quick-action-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const section = e.target.closest('.quick-action-btn').dataset.section;
+                    if (section) {
+                        switchSection(section);
+                    }
+                });
+            });
+
+            // Teacher selection change (only for admin)
+            if (currentUser && currentUser.role === 'admin') {
+                document.getElementById('teacher-select').addEventListener('change', (e) => {
+                    const teacher = sampleTeachers.find(t => t.name === e.target.value);
+                    const subjectSelect = document.getElementById('subject-select');
+                    
+                    subjectSelect.innerHTML = '<option value="">اختر المادة</option>';
+                    if (teacher) {
+                        teacher.subjects.forEach(subject => {
+                            const option = document.createElement('option');
+                            option.value = subject;
+                            option.textContent = subject;
+                            subjectSelect.appendChild(option);
+                        });
+                    }
+                });
+            }
+
+            // Load students
+            document.getElementById('load-students').addEventListener('click', loadStudents);
+
+            // Mark all buttons
+            document.getElementById('mark-all-present').addEventListener('click', () => markAll('حاضر'));
+            document.getElementById('mark-all-absent').addEventListener('click', () => markAll('غائب'));
+
+            // Save attendance
+            document.getElementById('save-attendance').addEventListener('click', saveAttendance);
+
+            // Generate report
+            document.getElementById('generate-report').addEventListener('click', generateReport);
+
+            // Session management
+            const createSessionBtn = document.getElementById('create-session-btn');
+            if (createSessionBtn) {
+                createSessionBtn.addEventListener('click', createAttendanceSession);
+            }
+
+            // Add event delegation for dynamically created buttons
+            document.addEventListener('click', (e) => {
+                // End session buttons
+                if (e.target.classList.contains('end-session-btn') || e.target.closest('.end-session-btn')) {
+                    e.preventDefault();
+                    const btn = e.target.classList.contains('end-session-btn') ? e.target : e.target.closest('.end-session-btn');
+                    const sessionId = btn.dataset.sessionId;
+                    if (sessionId) {
+                        endAttendanceSession(sessionId);
+                    }
+                }
+
+                // Join session buttons
+                if (e.target.classList.contains('join-session-btn') || e.target.closest('.join-session-btn')) {
+                    e.preventDefault();
+                    const btn = e.target.classList.contains('join-session-btn') ? e.target : e.target.closest('.join-session-btn');
+                    const sessionId = btn.dataset.sessionId;
+                    if (sessionId) {
+                        joinAttendanceSession(sessionId);
+                    }
+                }
+            });
+        }
+
+        function switchSection(section) {
+            // Hide all sections
+            document.querySelectorAll('.section').forEach(s => s.classList.add('hidden'));
+            
+            // Show target section
+            const targetSection = document.getElementById(`${section.replace('_', '-')}-section`);
+            if (targetSection) {
+                targetSection.classList.remove('hidden');
+            }
+            
+            // Update navigation buttons
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('text-blue-600', 'bg-blue-50', 'active');
+                btn.classList.add('text-gray-600');
+            });
+            
+            const activeBtn = document.getElementById(`nav-${section.replace('_', '-')}`);
+            if (activeBtn) {
+                activeBtn.classList.remove('text-gray-600');
+                activeBtn.classList.add('text-blue-600', 'bg-blue-50', 'active');
+            }
+
+            // Update section content based on current section
+            switch(section) {
+                case 'reports':
+                    updateReports();
+                    break;
+                case 'students':
+                    updateStudentCounts();
+                    displayAllStudents();
+                    break;
+                case 'student_view':
+                case 'student-view':
+                    updateStudentView();
+                    break;
+                case 'dashboard':
+                    updateDashboardStats();
+                    break;
+                case 'attendance':
+                    // Initialize attendance section
+                    break;
+            }
+        }
+
+        function updateDashboardStats() {
+            const today = new Date().toISOString().split('T')[0];
+            const todayRecords = attendanceRecords.filter(record => record.date === today);
+            
+            const presentToday = todayRecords.filter(record => record.status === 'حاضر').length;
+            const absentToday = todayRecords.filter(record => record.status === 'غائب').length;
+            const totalToday = presentToday + absentToday;
+            const attendanceRate = totalToday > 0 ? ((presentToday / totalToday) * 100).toFixed(1) : 0;
+
+            document.getElementById('total-students').textContent = dynamicStudents.length;
+            document.getElementById('today-present').textContent = presentToday;
+            document.getElementById('today-absent').textContent = absentToday;
+            document.getElementById('attendance-rate').textContent = attendanceRate + '%';
+        }
+
+        function updateRecentActivity() {
+            const container = document.getElementById('recent-activity');
+            const recentRecords = attendanceRecords
+                .sort((a, b) => new Date(b.date) - new Date(a.date))
+                .slice(0, 5);
+
+            if (recentRecords.length === 0) {
+                container.innerHTML = `
+                    <div class="flex items-center p-4 bg-gray-50 rounded-xl">
+                        <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center ml-4">
+                            <svg class="w-5 h-5 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M10 2L3 7v11a2 2 0 002 2h4v-6h2v6h4a2 2 0 002-2V7l-7-5z"/>
+                            </svg>
+                        </div>
+                        <div class="flex-1">
+                            <p class="font-semibold text-gray-800">مرحباً بك في النظام! 🎉</p>
+                            <p class="text-gray-600 text-sm">ابدأ بتسجيل حضور الطلاب أو مراجعة التقارير</p>
+                        </div>
+                        <span class="text-xs text-gray-500 mobile-hidden">الآن</span>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = recentRecords.map(record => {
+                const statusIcon = record.status === 'حاضر' ? '✅' : '❌';
+                const statusColor = record.status === 'حاضر' ? 'text-green-600' : 'text-red-600';
+                
+                return `
+                    <div class="flex items-center p-4 mobile-p-2 bg-gray-50 rounded-xl slide-in">
+                        <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center ml-4 mobile-ml-2">
+                            <span class="text-sm">${statusIcon}</span>
+                        </div>
+                        <div class="flex-1">
+                            <p class="font-semibold text-gray-800 text-lg mobile-text-sm">${record.student_name}</p>
+                            <p class="text-gray-600 text-sm mobile-text-xs">${record.subject} - ${record.group}</p>
+                        </div>
+                        <div class="text-center mobile-hidden">
+                            <span class="text-xs ${statusColor} font-semibold">${record.status}</span>
+                            <p class="text-xs text-gray-500">${record.date}</p>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        async function loadStudents() {
+            const teacher = document.getElementById('teacher-select').value;
+            const subject = document.getElementById('subject-select').value;
+            const group = document.getElementById('group-select').value;
+            const date = document.getElementById('date-input').value;
+
+            if (!teacher || !subject || !group || !date) {
+                showMessage('يرجى اختيار جميع البيانات المطلوبة', 'error');
+                return;
+            }
+
+            // Additional validation for teachers - ensure they can only access their subjects
+            if (currentUser && currentUser.role === 'teacher') {
+                const teacherData = sampleTeachers.find(t => t.name === currentUser.name);
+                if (!teacherData || !teacherData.subjects.includes(subject)) {
+                    showMessage('غير مسموح لك بتسجيل حضور هذه المادة', 'error');
+                    return;
+                }
+                
+                if (teacher !== currentUser.name) {
+                    showMessage('غير مسموح لك بتسجيل حضور باسم معلم آخر', 'error');
+                    return;
+                }
+            }
+
+            setLoading(true);
+
+            const groupStudents = dynamicStudents.filter(s => s.group === group);
+            
+            const existingAttendance = attendanceRecords.filter(record => 
+                record.date === date && 
+                record.subject === subject && 
+                record.teacher_name === teacher &&
+                record.group === group
+            );
+
+            currentAttendanceData = groupStudents.map(student => {
+                const existing = existingAttendance.find(a => a.student_id === student.id);
+                return {
+                    ...student,
+                    status: existing ? existing.status : 'غائب'
+                };
+            });
+
+            displayStudentsList();
+            document.getElementById('students-list').classList.remove('hidden');
+            setLoading(false);
+        }
+
+        function displayStudentsList() {
+            const container = document.getElementById('students-grid');
+            container.innerHTML = '';
+
+            currentAttendanceData.forEach((student, index) => {
+                const studentCard = document.createElement('div');
+                studentCard.className = 'bg-gray-50 p-6 mobile-p-4 rounded-2xl border-2 border-gray-200 hover:border-blue-300 transition-all modern-card';
+                studentCard.style.animationDelay = `${index * 0.1}s`;
+                studentCard.classList.add('fade-in');
+                
+                studentCard.innerHTML = `
+                    <div class="flex items-center justify-between mb-4 mobile-mb-2">
+                        <div class="flex items-center mobile-grid-1 mobile-space-y-2">
+                            <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center ml-3 mobile-ml-0">
+                                <span class="text-lg mobile-text-sm font-bold text-blue-600">${student.name.charAt(0)}</span>
+                            </div>
+                            <div class="text-center">
+                                <h4 class="font-bold text-gray-800 text-lg mobile-text-sm">${student.name}</h4>
+                                <span class="text-sm mobile-text-xs text-gray-500">${student.id}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex space-x-reverse space-x-3 mobile-grid-2 mobile-gap-2">
+                        <button class="attendance-btn flex-1 py-3 mobile-py-2 px-4 mobile-px-2 rounded-xl text-sm mobile-text-xs font-bold transition-all transform hover:scale-105 touch-btn ${student.status === 'حاضر' ? 'bg-green-600 text-white shadow-lg' : 'bg-gray-200 text-gray-700 hover:bg-green-100'}" 
+                                data-student="${student.id}" data-status="حاضر">
+                            ✅ حاضر
+                        </button>
+                        <button class="attendance-btn flex-1 py-3 mobile-py-2 px-4 mobile-px-2 rounded-xl text-sm mobile-text-xs font-bold transition-all transform hover:scale-105 touch-btn ${student.status === 'غائب' ? 'bg-red-600 text-white shadow-lg' : 'bg-gray-200 text-gray-700 hover:bg-red-100'}" 
+                                data-student="${student.id}" data-status="غائب">
+                            ❌ غائب
+                        </button>
+                    </div>
+                `;
+                container.appendChild(studentCard);
+            });
+
+            document.querySelectorAll('.attendance-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const studentId = e.target.dataset.student;
+                    const status = e.target.dataset.status;
+                    updateStudentStatus(studentId, status);
+                });
+            });
+        }
+
+        function updateStudentStatus(studentId, status) {
+            const student = currentAttendanceData.find(s => s.id === studentId);
+            if (student) {
+                student.status = status;
+                displayStudentsList();
+            }
+        }
+
+        function markAll(status) {
+            currentAttendanceData.forEach(student => {
+                student.status = status;
+            });
+            displayStudentsList();
+        }
+
+        async function saveAttendance() {
+            if (currentAttendanceData.length === 0) {
+                showMessage('لا توجد بيانات للحفظ', 'error');
+                return;
+            }
+
+            const teacher = document.getElementById('teacher-select').value;
+            const subject = document.getElementById('subject-select').value;
+            const group = document.getElementById('group-select').value;
+            const date = document.getElementById('date-input').value;
+
+            // Additional validation for teachers
+            if (currentUser && currentUser.role === 'teacher') {
+                const teacherData = sampleTeachers.find(t => t.name === currentUser.name);
+                if (!teacherData || !teacherData.subjects.includes(subject)) {
+                    showMessage('غير مسموح لك بحفظ حضور هذه المادة', 'error');
+                    return;
+                }
+                
+                if (teacher !== currentUser.name) {
+                    showMessage('غير مسموح لك بحفظ حضور باسم معلم آخر', 'error');
+                    return;
+                }
+            }
+
+            setLoading(true);
+
+            try {
+                if (window.dataSdk && typeof window.dataSdk.create === 'function') {
+                    // Remove existing records for this session
+                    const existingRecords = attendanceRecords.filter(record => 
+                        record.date === date && 
+                        record.subject === subject && 
+                        record.teacher_name === teacher &&
+                        record.group === group
+                    );
+
+                    for (const record of existingRecords) {
+                        await window.dataSdk.delete(record);
+                    }
+
+                    // Add new records
+                    for (const student of currentAttendanceData) {
+                        const result = await window.dataSdk.create({
+                            type: 'attendance',
+                            student_id: student.id,
+                            student_name: student.name,
+                            group: group,
+                            subject: subject,
+                            date: date,
+                            status: student.status,
+                            teacher_name: teacher
+                        });
+
+                        if (!result.isOk) {
+                            throw new Error('فشل في حفظ البيانات');
+                        }
+                    }
+                } else {
+                    // Standalone mode - save to local array
+                    console.log('Saving attendance in standalone mode');
+                    
+                    // Remove existing records
+                    attendanceRecords = attendanceRecords.filter(record => 
+                        !(record.date === date && 
+                          record.subject === subject && 
+                          record.teacher_name === teacher &&
+                          record.group === group)
+                    );
+
+                    // Add new records
+                    for (const student of currentAttendanceData) {
+                        attendanceRecords.push({
+                            __backendId: 'local_' + Date.now() + '_' + Math.random(),
+                            type: 'attendance',
+                            student_id: student.id,
+                            student_name: student.name,
+                            group: group,
+                            subject: subject,
+                            date: date,
+                            status: student.status,
+                            teacher_name: teacher
+                        });
+                    }
+
+                    // Update UI
+                    updateDashboardStats();
+                    updateRecentActivity();
+                }
+
+                showMessage('تم حفظ الحضور والغياب بنجاح! 🎉', 'success');
+            } catch (error) {
+                console.error('Save error:', error);
+                showMessage('حدث خطأ أثناء الحفظ', 'error');
+            } finally {
+                setLoading(false);
+            }
+        }
+
+        function generateReport() {
+            const group = document.getElementById('report-group').value;
+            const subject = document.getElementById('report-subject').value;
+            const dateFrom = document.getElementById('report-date-from').value;
+
+            let filteredRecords = attendanceRecords;
+
+            if (group) {
+                filteredRecords = filteredRecords.filter(r => r.group === group);
+            }
+            if (subject) {
+                filteredRecords = filteredRecords.filter(r => r.subject === subject);
+            }
+            if (dateFrom) {
+                filteredRecords = filteredRecords.filter(r => r.date >= dateFrom);
+            }
+
+            displayReport(filteredRecords);
+            document.getElementById('report-results').classList.remove('hidden');
+        }
+
+        function displayReport(records) {
+            const container = document.getElementById('report-content');
+            
+            if (records.length === 0) {
+                container.innerHTML = '<p class="text-gray-600 text-center py-8 text-lg mobile-text-sm">📊 لا توجد بيانات للعرض</p>';
+                return;
+            }
+
+            const studentStats = {};
+            records.forEach(record => {
+                if (!studentStats[record.student_id]) {
+                    studentStats[record.student_id] = {
+                        name: record.student_name,
+                        group: record.group,
+                        present: 0,
+                        absent: 0,
+                        total: 0
+                    };
+                }
+                
+                studentStats[record.student_id].total++;
+                if (record.status === 'حاضر') {
+                    studentStats[record.student_id].present++;
+                } else {
+                    studentStats[record.student_id].absent++;
+                }
+            });
+
+            let tableHTML = `
+                <table class="responsive-table min-w-full bg-white border border-gray-300 rounded-xl overflow-hidden">
+                    <thead class="bg-gradient-to-r from-blue-600 to-purple-600 text-white">
+                        <tr>
+                            <th class="px-6 mobile-px-2 py-4 mobile-py-2 text-right text-sm mobile-text-xs font-bold uppercase tracking-wider">👤 اسم الطالب</th>
+                            <th class="px-6 mobile-px-2 py-4 mobile-py-2 text-right text-sm mobile-text-xs font-bold uppercase tracking-wider mobile-hidden">🎓 الفرقة</th>
+                            <th class="px-6 mobile-px-2 py-4 mobile-py-2 text-right text-sm mobile-text-xs font-bold uppercase tracking-wider">✅ الحضور</th>
+                            <th class="px-6 mobile-px-2 py-4 mobile-py-2 text-right text-sm mobile-text-xs font-bold uppercase tracking-wider">❌ الغياب</th>
+                            <th class="px-6 mobile-px-2 py-4 mobile-py-2 text-right text-sm mobile-text-xs font-bold uppercase tracking-wider mobile-hidden">📊 المجموع</th>
+                            <th class="px-6 mobile-px-2 py-4 mobile-py-2 text-right text-sm mobile-text-xs font-bold uppercase tracking-wider">📈 نسبة الحضور</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+            `;
+
+            Object.values(studentStats).forEach((student, index) => {
+                const attendanceRate = ((student.present / student.total) * 100).toFixed(1);
+                const rateClass = attendanceRate >= 75 ? 'text-green-600 bg-green-50' : 
+                                 attendanceRate >= 50 ? 'text-yellow-600 bg-yellow-50' : 'text-red-600 bg-red-50';
+                const rowClass = index % 2 === 0 ? 'bg-gray-50' : 'bg-white';
+                
+                tableHTML += `
+                    <tr class="${rowClass} hover:bg-blue-50 transition-colors">
+                        <td class="px-6 mobile-px-2 py-4 mobile-py-2 whitespace-nowrap text-sm mobile-text-xs font-semibold text-gray-900">${student.name}</td>
+                        <td class="px-6 mobile-px-2 py-4 mobile-py-2 whitespace-nowrap text-sm mobile-text-xs text-gray-600 mobile-hidden">${student.group}</td>
+                        <td class="px-6 mobile-px-2 py-4 mobile-py-2 whitespace-nowrap text-sm mobile-text-xs font-bold text-green-600">${student.present}</td>
+                        <td class="px-6 mobile-px-2 py-4 mobile-py-2 whitespace-nowrap text-sm mobile-text-xs font-bold text-red-600">${student.absent}</td>
+                        <td class="px-6 mobile-px-2 py-4 mobile-py-2 whitespace-nowrap text-sm mobile-text-xs font-bold text-gray-900 mobile-hidden">${student.total}</td>
+                        <td class="px-6 mobile-px-2 py-4 mobile-py-2 whitespace-nowrap">
+                            <span class="px-3 mobile-px-2 py-1 rounded-full text-sm mobile-text-xs font-bold ${rateClass}">${attendanceRate}%</span>
+                        </td>
+                    </tr>
+                `;
+            });
+
+            tableHTML += '</tbody></table>';
+            container.innerHTML = tableHTML;
+        }
+
+        function updateStudentView() {
+            if (!currentUser || currentUser.role !== 'student') return;
+
+            // Update student info in header
+            const studentWelcomeName = document.getElementById('student-welcome-name');
+            const studentIdDisplay = document.getElementById('student-id-display');
+            
+            if (studentWelcomeName) {
+                studentWelcomeName.textContent = currentUser.name;
+            }
+            if (studentIdDisplay) {
+                studentIdDisplay.textContent = currentUser.studentId;
+            }
+
+            const studentId = currentUser.studentId;
+            const studentRecords = attendanceRecords.filter(record => record.student_id === studentId);
+
+            let presentCount = 0;
+            let absentCount = 0;
+
+            studentRecords.forEach(record => {
+                if (record.status === 'حاضر') {
+                    presentCount++;
+                } else {
+                    absentCount++;
+                }
+            });
+
+            const totalCount = presentCount + absentCount;
+            const attendanceRate = totalCount > 0 ? ((presentCount / totalCount) * 100).toFixed(1) : 0;
+
+            document.getElementById('student-present-count').textContent = presentCount;
+            document.getElementById('student-absent-count').textContent = absentCount;
+            document.getElementById('student-attendance-rate').textContent = attendanceRate + '%';
+
+            displayStudentAttendanceDetails(studentRecords);
+            updateStudentSessionsDisplay();
+        }
+
+        function displayStudentAttendanceDetails(records) {
+            const container = document.getElementById('student-attendance-details');
+            
+            if (records.length === 0) {
+                container.innerHTML = '<p class="text-gray-600 text-center py-8 text-lg mobile-text-sm">📋 لا توجد سجلات حضور</p>';
+                return;
+            }
+
+            let tableHTML = `
+                <table class="responsive-table min-w-full bg-white border border-gray-300 rounded-xl overflow-hidden">
+                    <thead class="bg-gradient-to-r from-blue-600 to-purple-600 text-white">
+                        <tr>
+                            <th class="px-6 mobile-px-2 py-4 mobile-py-2 text-right text-sm mobile-text-xs font-bold uppercase tracking-wider">📅 التاريخ</th>
+                            <th class="px-6 mobile-px-2 py-4 mobile-py-2 text-right text-sm mobile-text-xs font-bold uppercase tracking-wider">📚 المادة</th>
+                            <th class="px-6 mobile-px-2 py-4 mobile-py-2 text-right text-sm mobile-text-xs font-bold uppercase tracking-wider mobile-hidden">👨‍🏫 المعلم</th>
+                            <th class="px-6 mobile-px-2 py-4 mobile-py-2 text-right text-sm mobile-text-xs font-bold uppercase tracking-wider">📊 الحالة</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+            `;
+
+            records.sort((a, b) => new Date(b.date) - new Date(a.date)).forEach((record, index) => {
+                const statusIcon = record.status === 'حاضر' ? '✅' : '❌';
+                const statusClass = record.status === 'حاضر' ? 'text-green-600 bg-green-50' : 'text-red-600 bg-red-50';
+                const rowClass = index % 2 === 0 ? 'bg-gray-50' : 'bg-white';
+                
+                tableHTML += `
+                    <tr class="${rowClass} hover:bg-blue-50 transition-colors">
+                        <td class="px-6 mobile-px-2 py-4 mobile-py-2 whitespace-nowrap text-sm mobile-text-xs font-semibold text-gray-900">${record.date}</td>
+                        <td class="px-6 mobile-px-2 py-4 mobile-py-2 whitespace-nowrap text-sm mobile-text-xs text-gray-900">${record.subject}</td>
+                        <td class="px-6 mobile-px-2 py-4 mobile-py-2 whitespace-nowrap text-sm mobile-text-xs text-gray-600 mobile-hidden">${record.teacher_name}</td>
+                        <td class="px-6 mobile-px-2 py-4 mobile-py-2 whitespace-nowrap">
+                            <span class="px-3 mobile-px-2 py-1 rounded-full text-sm mobile-text-xs font-bold ${statusClass}">${statusIcon} ${record.status}</span>
+                        </td>
+                    </tr>
+                `;
+            });
+
+            tableHTML += '</tbody></table>';
+            container.innerHTML = tableHTML;
+        }
+
+        function updateStudentCounts() {
+            const groups = ['الفرقة الأولى', 'الفرقة الثانية', 'الفرقة الثالثة', 'الفرقة الرابعة'];
+            
+            groups.forEach((group, index) => {
+                const count = dynamicStudents.filter(s => s.group === group).length;
+                document.getElementById(`group${index + 1}-count`).textContent = count;
+            });
+        }
+
+        function displayAllStudents() {
+            const container = document.getElementById('all-students-list');
+            
+            let tableHTML = `
+                <table class="responsive-table min-w-full bg-white border border-gray-300 rounded-xl overflow-hidden">
+                    <thead class="bg-gradient-to-r from-purple-600 to-blue-600 text-white">
+                        <tr>
+                            <th class="px-6 mobile-px-2 py-4 mobile-py-2 text-right text-sm mobile-text-xs font-bold uppercase tracking-wider">🆔 رقم الطالب</th>
+                            <th class="px-6 mobile-px-2 py-4 mobile-py-2 text-right text-sm mobile-text-xs font-bold uppercase tracking-wider">👤 اسم الطالب</th>
+                            <th class="px-6 mobile-px-2 py-4 mobile-py-2 text-right text-sm mobile-text-xs font-bold uppercase tracking-wider mobile-hidden">🎓 الفرقة</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+            `;
+
+            dynamicStudents.forEach((student, index) => {
+                const rowClass = index % 2 === 0 ? 'bg-gray-50' : 'bg-white';
+                tableHTML += `
+                    <tr class="${rowClass} hover:bg-blue-50 transition-colors">
+                        <td class="px-6 mobile-px-2 py-4 mobile-py-2 whitespace-nowrap text-sm mobile-text-xs font-bold text-blue-600">${student.id}</td>
+                        <td class="px-6 mobile-px-2 py-4 mobile-py-2 whitespace-nowrap text-sm mobile-text-xs font-semibold text-gray-900">${student.name}</td>
+                        <td class="px-6 mobile-px-2 py-4 mobile-py-2 whitespace-nowrap text-sm mobile-text-xs text-gray-600 mobile-hidden">${student.group}</td>
+                    </tr>
+                `;
+            });
+
+            tableHTML += '</tbody></table>';
+            container.innerHTML = tableHTML;
+        }
+
+        function updateReports() {
+            // Refresh reports when section is shown
+        }
+
+        function setLoading(loading) {
+            isLoading = loading;
+            const loadBtn = document.getElementById('load-students');
+            const saveBtn = document.getElementById('save-attendance');
+            
+            if (loading) {
+                loadBtn.classList.add('loading');
+                saveBtn.classList.add('loading');
+                loadBtn.innerHTML = '⏳ جاري التحميل...';
+                saveBtn.innerHTML = '💾 جاري الحفظ...';
+            } else {
+                loadBtn.classList.remove('loading');
+                saveBtn.classList.remove('loading');
+                loadBtn.innerHTML = '📋 تحميل قائمة الطلاب';
+                saveBtn.innerHTML = '💾 حفظ الحضور والغياب';
+            }
+        }
+
+        function showMessage(message, type) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `fixed top-6 right-6 mobile-top-4 mobile-right-4 p-6 mobile-p-4 rounded-2xl shadow-2xl z-50 max-w-md mobile-max-w-xs bounce-in ${
+                type === 'success' ? 'bg-green-100 text-green-800 border-2 border-green-200' : 
+                'bg-red-100 text-red-800 border-2 border-red-200'
+            }`;
+            messageDiv.innerHTML = `
+                <div class="flex items-center">
+                    <div class="flex-shrink-0 ml-3 mobile-ml-2">
+                        ${type === 'success' ? 
+                            '<svg class="w-6 h-6 mobile-w-5 mobile-h-5 text-green-600" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>' :
+                            '<svg class="w-6 h-6 mobile-w-5 mobile-h-5 text-red-600" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>'
+                        }
+                    </div>
+                    <div class="font-semibold mobile-text-sm">${message}</div>
+                </div>
+            `;
+            
+            document.body.appendChild(messageDiv);
+            
+            setTimeout(() => {
+                messageDiv.remove();
+            }, 4000);
+        }
+
+        // Session Management Functions
+        function populateSessionSubjects() {
+            const sessionSubjectSelect = document.getElementById('session-subject');
+            if (sessionSubjectSelect && currentUser.role === 'teacher') {
+                const teacher = sampleTeachers.find(t => t.name === currentUser.name);
+                if (teacher) {
+                    teacher.subjects.forEach(subject => {
+                        const option = document.createElement('option');
+                        option.value = subject;
+                        option.textContent = subject;
+                        sessionSubjectSelect.appendChild(option);
+                    });
+                }
+            }
+        }
+
+        async function createAttendanceSession() {
+            if (!currentUser || currentUser.role !== 'teacher') {
+                showMessage('غير مسموح لك بإنشاء جلسات', 'error');
+                return;
+            }
+
+            const subject = document.getElementById('session-subject').value;
+            const group = document.getElementById('session-group').value;
+            const duration = parseInt(document.getElementById('session-duration').value);
+            const createBtn = document.getElementById('create-session-btn');
+
+            if (!subject || !group) {
+                showMessage('يرجى اختيار المادة والفرقة', 'error');
+                return;
+            }
+
+            // Check if there's already an active session for this subject and group
+            const now = new Date();
+            const existingSession = attendanceSessions.find(session => 
+                session.subject === subject && 
+                session.group === group && 
+                session.teacher_name === currentUser.name &&
+                session.status === 'active' &&
+                new Date(session.end_time) > now
+            );
+
+            if (existingSession) {
+                showMessage('يوجد جلسة نشطة بالفعل لهذه المادة والفرقة', 'error');
+                return;
+            }
+
+            createBtn.disabled = true;
+            createBtn.innerHTML = '⏳ جاري إنشاء الجلسة...';
+
+            try {
+                const endTime = new Date(now.getTime() + duration * 60000);
+                const sessionData = {
+                    type: 'session',
+                    subject: subject,
+                    group: group,
+                    teacher_name: currentUser.name,
+                    start_time: now.toISOString(),
+                    end_time: endTime.toISOString(),
+                    duration: duration,
+                    date: now.toISOString().split('T')[0],
+                    status: 'active',
+                    session_code: generateSessionCode()
+                };
+
+                if (window.dataSdk && typeof window.dataSdk.create === 'function') {
+                    console.log('Creating session with Data SDK:', sessionData);
+                    
+                    const result = await window.dataSdk.create(sessionData);
+
+                    if (!result.isOk) {
+                        throw new Error('فشل في إنشاء الجلسة');
+                    }
+                } else {
+                    // Standalone mode - add to local array
+                    console.log('Creating session in standalone mode:', sessionData);
+                    sessionData.__backendId = 'local_session_' + Date.now() + '_' + Math.random();
+                    attendanceSessions.push(sessionData);
+                    
+                    // Update displays immediately
+                    updateActiveSessionsDisplay();
+                    updateStudentSessionsDisplay();
+                }
+
+                showMessage('تم إنشاء جلسة الحضور بنجاح! 🎉', 'success');
+                
+                // Reset form
+                document.getElementById('session-subject').value = '';
+                document.getElementById('session-group').value = '';
+                document.getElementById('session-duration').value = '30';
+
+            } catch (error) {
+                console.error('Session creation error:', error);
+                showMessage('حدث خطأ أثناء إنشاء الجلسة: ' + error.message, 'error');
+            } finally {
+                createBtn.disabled = false;
+                createBtn.innerHTML = `
+                    <svg class="w-6 h-6 inline-block ml-3" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"/>
+                    </svg>
+                    🚀 بدء جلسة الحضور
+                `;
+            }
+        }
+
+        function generateSessionCode() {
+            return Math.random().toString(36).substr(2, 8).toUpperCase();
+        }
+
+        async function endAttendanceSession(sessionId) {
+            try {
+                const session = attendanceSessions.find(s => s.__backendId === sessionId);
+                if (session && window.dataSdk) {
+                    session.status = 'ended';
+                    session.end_time = new Date().toISOString();
+                    
+                    const result = await window.dataSdk.update(session);
+                    if (result.isOk) {
+                        showMessage('تم إنهاء الجلسة بنجاح', 'success');
+                    }
+                }
+            } catch (error) {
+                showMessage('حدث خطأ أثناء إنهاء الجلسة', 'error');
+            }
+        }
+
+        function updateActiveSessionsDisplay() {
+            const container = document.getElementById('active-sessions-list');
+            if (!container) return;
+            
+            const now = new Date();
+            const activeSessions = attendanceSessions.filter(session => 
+                session.status === 'active' && 
+                new Date(session.end_time) > now &&
+                (currentUser.role === 'admin' || session.teacher_name === currentUser.name)
+            );
+
+            console.log('Active sessions:', activeSessions);
+
+            if (activeSessions.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-8 mobile-py-4 text-gray-500">
+                        <svg class="w-16 h-16 mx-auto mb-4 mobile-mb-2 opacity-50" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+                        </svg>
+                        <p class="text-lg mobile-text-sm font-semibold">لا توجد جلسات نشطة حالياً</p>
+                        <p class="text-sm mobile-text-xs mt-2">قم بإنشاء جلسة جديدة لبدء تسجيل الحضور</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = activeSessions.map(session => {
+                const startTime = new Date(session.start_time);
+                const endTime = new Date(session.end_time);
+                const timeLeft = Math.max(0, Math.floor((endTime - now) / 60000));
+                
+                return `
+                    <div class="bg-gradient-to-r from-green-50 to-blue-50 rounded-2xl p-6 mobile-p-4 mb-4 border-2 border-green-200 modern-card">
+                        <div class="flex justify-between items-center mobile-grid-1 mobile-space-y-2">
+                            <div class="flex items-center mobile-grid-1 mobile-space-y-2">
+                                <div class="w-16 h-16 bg-green-100 rounded-2xl flex items-center justify-center ml-4 mobile-ml-0">
+                                    <svg class="w-8 h-8 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                                    </svg>
+                                </div>
+                                <div class="text-center">
+                                    <h5 class="text-xl mobile-text-lg font-bold text-gray-800">${session.subject}</h5>
+                                    <p class="text-gray-600 mobile-text-sm">${session.group}</p>
+                                    <p class="text-sm mobile-text-xs text-green-600 font-semibold">كود الجلسة: ${session.session_code}</p>
+                                </div>
+                            </div>
+                            <div class="text-center">
+                                <div class="bg-green-100 text-green-800 px-4 mobile-px-2 py-2 mobile-py-1 rounded-full text-sm mobile-text-xs font-bold mb-3 mobile-mb-2">
+                                    ⏰ ${timeLeft} دقيقة متبقية
+                                </div>
+                                <button class="end-session-btn bg-red-600 text-white px-6 mobile-px-4 py-2 mobile-py-1 rounded-xl hover:bg-red-700 font-semibold text-sm mobile-text-xs transition-all touch-btn" data-session-id="${session.__backendId}">
+                                    ⏹️ إنهاء الجلسة
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function updateStudentSessionsDisplay() {
+            if (currentUser.role !== 'student') return;
+
+            const container = document.getElementById('student-sessions-list');
+            if (!container) return;
+            
+            const student = sampleStudents.find(s => s.id === currentUser.studentId);
+            if (!student) {
+                container.innerHTML = `
+                    <div class="text-center py-8 mobile-py-4 text-blue-100">
+                        <svg class="w-16 h-16 mx-auto mb-4 mobile-mb-2 opacity-50" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/>
+                        </svg>
+                        <p class="text-lg mobile-text-sm font-semibold text-red-200">❌ خطأ في بيانات الطالب</p>
+                        <p class="text-sm mobile-text-xs mt-2 opacity-80">لم يتم العثور على بيانات الطالب في النظام</p>
+                    </div>
+                `;
+                return;
+            }
+
+            const now = new Date();
+            // Only show sessions that are:
+            // 1. Active status
+            // 2. For the student's group
+            // 3. Not expired
+            // 4. Started by a teacher (not admin manual entry)
+            const availableSessions = attendanceSessions.filter(session => 
+                session.status === 'active' && 
+                session.group === student.group &&
+                new Date(session.end_time) > now &&
+                session.teacher_name && // Must have a teacher
+                session.session_code // Must have a session code (created by teacher)
+            );
+
+            console.log('Available sessions for student:', availableSessions);
+            console.log('Student group:', student.group);
+            console.log('All sessions:', attendanceSessions);
+
+            if (availableSessions.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-8 mobile-py-4 text-blue-100">
+                        <svg class="w-16 h-16 mx-auto mb-4 mobile-mb-2 opacity-50" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+                        </svg>
+                        <p class="text-lg mobile-text-sm font-semibold">🔒 لا توجد جلسات حضور نشطة حالياً</p>
+                        <p class="text-sm mobile-text-xs mt-2 opacity-80">انتظر حتى يفتح أحد المعلمين جلسة حضور لفرقتك</p>
+                        <div class="mt-4 mobile-mt-2 bg-white bg-opacity-10 rounded-xl p-4 mobile-p-2">
+                            <p class="text-sm mobile-text-xs opacity-90">💡 <strong>نصيحة:</strong> ستظهر الجلسات هنا تلقائياً عند فتحها من قبل المعلمين</p>
+                            <p class="text-xs mobile-text-xs opacity-75 mt-2">فرقتك: <strong>${student.group}</strong></p>
+                        </div>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = availableSessions.map(session => {
+                const endTime = new Date(session.end_time);
+                const timeLeft = Math.max(0, Math.floor((endTime - now) / 60000));
+                
+                // Check if student already checked in
+                const alreadyCheckedIn = attendanceRecords.some(record => 
+                    record.student_id === currentUser.studentId &&
+                    record.date === session.date &&
+                    record.subject === session.subject &&
+                    record.teacher_name === session.teacher_name
+                );
+                
+                return `
+                    <div class="bg-white bg-opacity-20 rounded-2xl p-6 mobile-p-4 mb-4 backdrop-blur-sm border border-white border-opacity-30">
+                        <div class="text-center">
+                            <div class="flex items-center justify-center mb-4 mobile-mb-2">
+                                <div class="w-16 h-16 bg-white bg-opacity-30 rounded-2xl flex items-center justify-center ml-4">
+                                    <svg class="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                        <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <h5 class="text-2xl mobile-text-lg font-bold text-white">${session.subject}</h5>
+                                    <p class="text-blue-100 mobile-text-sm">${session.teacher_name}</p>
+                                </div>
+                            </div>
+                            
+                            <div class="bg-white bg-opacity-20 rounded-xl p-4 mobile-p-2 mb-4 mobile-mb-2">
+                                <p class="text-white font-bold text-lg mobile-text-sm">⏰ ${timeLeft} دقيقة متبقية</p>
+                                <p class="text-blue-100 text-sm mobile-text-xs">كود الجلسة: ${session.session_code}</p>
+                            </div>
+                            
+                            ${alreadyCheckedIn ? 
+                                '<div class="bg-green-500 bg-opacity-80 text-white px-6 py-3 rounded-full font-bold text-lg mobile-text-sm">✅ تم تسجيل حضورك</div>' :
+                                `<button class="join-session-btn bg-white text-blue-600 px-8 mobile-px-6 py-4 mobile-py-3 rounded-full font-bold text-lg mobile-text-sm hover:bg-blue-50 transform hover:scale-110 transition-all duration-300 shadow-2xl touch-btn" data-session-id="${session.__backendId}">
+                                    <svg class="w-6 h-6 inline-block ml-3" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                                    </svg>
+                                    ✅ تسجيل الحضور
+                                </button>`
+                            }
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        async function joinAttendanceSession(sessionId) {
+            if (!currentUser || currentUser.role !== 'student') {
+                showMessage('🚫 غير مسموح لك بتسجيل الحضور - يجب أن تكون طالباً', 'error');
+                return;
+            }
+
+            const session = attendanceSessions.find(s => s.__backendId === sessionId);
+            if (!session) {
+                showMessage('❌ لم يتم العثور على الجلسة المطلوبة', 'error');
+                return;
+            }
+
+            const student = sampleStudents.find(s => s.id === currentUser.studentId);
+            if (!student) {
+                showMessage('❌ لم يتم العثور على بيانات الطالب في النظام', 'error');
+                return;
+            }
+
+            // Check if session is still active and not expired
+            const now = new Date();
+            if (new Date(session.end_time) <= now) {
+                showMessage('⏰ انتهت مدة الجلسة - لا يمكن تسجيل الحضور بعد انتهاء الوقت المحدد', 'error');
+                return;
+            }
+
+            // Check if session status is active
+            if (session.status !== 'active') {
+                showMessage('🔒 الجلسة غير نشطة حالياً - لا يمكن تسجيل الحضور', 'error');
+                return;
+            }
+
+            // Verify student belongs to the correct group for this session
+            if (student.group !== session.group) {
+                showMessage('🚫 هذه الجلسة مخصصة لفرقة أخرى - لا يمكنك تسجيل الحضور', 'error');
+                return;
+            }
+
+            // Check if already checked in for this specific session
+            const existingRecord = attendanceRecords.find(record => 
+                record.student_id === currentUser.studentId &&
+                record.date === session.date &&
+                record.subject === session.subject &&
+                record.teacher_name === session.teacher_name &&
+                record.group === session.group
+            );
+
+            if (existingRecord) {
+                showMessage('✅ تم تسجيل حضورك مسبقاً لهذه الجلسة - لا يمكن التسجيل مرة أخرى', 'warning');
+                return;
+            }
+
+            // Show loading state
+            const joinBtn = document.querySelector(`[data-session-id="${sessionId}"]`);
+            if (joinBtn) {
+                joinBtn.disabled = true;
+                joinBtn.innerHTML = '⏳ جاري تسجيل الحضور...';
+            }
+
+            try {
+                const attendanceData = {
+                    type: 'attendance',
+                    student_id: currentUser.studentId,
+                    student_name: currentUser.name,
+                    group: student.group,
+                    subject: session.subject,
+                    date: session.date,
+                    status: 'حاضر',
+                    teacher_name: session.teacher_name,
+                    session_id: sessionId
+                };
+
+                if (window.dataSdk && typeof window.dataSdk.create === 'function') {
+                    console.log('Creating attendance record with Data SDK:', attendanceData);
+                    
+                    const result = await window.dataSdk.create(attendanceData);
+
+                    if (!result.isOk) {
+                        throw new Error('فشل في تسجيل الحضور');
+                    }
+                } else {
+                    // Standalone mode - add to local array
+                    console.log('Creating attendance record in standalone mode:', attendanceData);
+                    attendanceData.__backendId = 'local_attendance_' + Date.now() + '_' + Math.random();
+                    attendanceRecords.push(attendanceData);
+                    
+                    // Update displays immediately
+                    updateStudentView();
+                    updateStudentSessionsDisplay();
+                    updateDashboardStats();
+                    updateRecentActivity();
+                }
+
+                showMessage('🎉 تم تسجيل حضورك بنجاح في جلسة ' + session.subject + '!', 'success');
+                showCheckinStatus('✅ تم تسجيل حضورك بنجاح في جلسة ' + session.subject + ' مع ' + session.teacher_name, 'success');
+
+            } catch (error) {
+                console.error('Attendance registration error:', error);
+                showMessage('حدث خطأ أثناء تسجيل الحضور: ' + error.message, 'error');
+            } finally {
+                // Reset button state
+                if (joinBtn) {
+                    joinBtn.disabled = false;
+                    joinBtn.innerHTML = `
+                        <svg class="w-6 h-6 inline-block ml-3" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                        </svg>
+                        ✅ تسجيل الحضور
+                    `;
+                }
+            }
+        }
+
+        function showCheckinStatus(message, type) {
+            const statusDiv = document.getElementById('checkin-status');
+            const bgColor = type === 'success' ? 'bg-green-100 border-green-300 text-green-800' : 
+                           type === 'warning' ? 'bg-yellow-100 border-yellow-300 text-yellow-800' :
+                           'bg-red-100 border-red-300 text-red-800';
+            
+            statusDiv.className = `p-6 mobile-p-4 rounded-2xl border-2 ${bgColor} text-center font-bold text-lg mobile-text-sm bounce-in`;
+            statusDiv.textContent = message;
+            statusDiv.classList.remove('hidden');
+
+            setTimeout(() => {
+                statusDiv.classList.add('hidden');
+            }, 6000);
+        }
+
+        // Admin Management Functions
+        function setupAdminTabs() {
+            document.querySelectorAll('.admin-tab').forEach(tab => {
+                tab.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const tabId = e.target.id;
+                    switchAdminTab(tabId);
+                });
+            });
+
+            // Setup form handlers
+            document.getElementById('add-student-form').addEventListener('submit', addStudent);
+            document.getElementById('add-teacher-form').addEventListener('submit', addTeacher);
+            document.getElementById('add-subject-form').addEventListener('submit', addSubject);
+            document.getElementById('filter-attendance').addEventListener('click', filterAttendanceRecords);
+        }
+
+        function switchAdminTab(tabId) {
+            // Hide all tab contents
+            document.querySelectorAll('.admin-tab-content').forEach(content => {
+                content.classList.add('hidden');
+            });
+
+            // Remove active class from all tabs
+            document.querySelectorAll('.admin-tab').forEach(tab => {
+                tab.classList.remove('text-blue-600', 'bg-blue-50', 'border-b-2', 'border-blue-600');
+                tab.classList.add('text-gray-600');
+            });
+
+            // Show selected tab content
+            const contentMap = {
+                'tab-students': 'students-tab-content',
+                'tab-teachers': 'teachers-tab-content',
+                'tab-subjects': 'subjects-tab-content',
+                'tab-attendance-mgmt': 'attendance-mgmt-tab-content'
+            };
+
+            const contentId = contentMap[tabId];
+            if (contentId) {
+                document.getElementById(contentId).classList.remove('hidden');
+            }
+
+            // Activate selected tab
+            const activeTab = document.getElementById(tabId);
+            activeTab.classList.remove('text-gray-600');
+            activeTab.classList.add('text-blue-600', 'bg-blue-50', 'border-b-2', 'border-blue-600');
+
+            // Load specific data for the tab
+            if (tabId === 'tab-teachers') {
+                displayTeachersList();
+            } else if (tabId === 'tab-subjects') {
+                displaySubjectsList();
+            } else if (tabId === 'tab-attendance-mgmt') {
+                populateAttendanceFilters();
+                displayAttendanceRecords();
+            }
+        }
+
+        function populateAdminData() {
+            populateTeacherSubjects();
+        }
+
+        function populateTeacherSubjects() {
+            const container = document.getElementById('teacher-subjects');
+            container.innerHTML = '';
+
+            dynamicSubjects.forEach(subject => {
+                const checkboxDiv = document.createElement('div');
+                checkboxDiv.className = 'flex items-center';
+                checkboxDiv.innerHTML = `
+                    <input type="checkbox" id="subject-${subject}" name="teacher-subjects" value="${subject}" class="ml-2 rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                    <label for="subject-${subject}" class="text-sm text-gray-700">${subject}</label>
+                `;
+                container.appendChild(checkboxDiv);
+            });
+        }
+
+        async function addStudent(e) {
+            e.preventDefault();
+            
+            const studentId = document.getElementById('student-id').value.trim();
+            const studentName = document.getElementById('student-name').value.trim();
+            const studentGroup = document.getElementById('student-group').value;
+
+            if (!studentId || !studentName || !studentGroup) {
+                showMessage('يرجى ملء جميع الحقول', 'error');
+                return;
+            }
+
+            // Check if student ID already exists
+            if (dynamicStudents.find(s => s.id === studentId)) {
+                showMessage('رقم الطالب موجود مسبقاً', 'error');
+                return;
+            }
+
+            const newStudent = {
+                id: studentId,
+                name: studentName,
+                group: studentGroup
+            };
+
+            try {
+                if (window.dataSdk && typeof window.dataSdk.create === 'function') {
+                    const result = await window.dataSdk.create({
+                        type: 'student',
+                        ...newStudent
+                    });
+
+                    if (!result.isOk) {
+                        throw new Error('فشل في إضافة الطالب');
+                    }
+                } else {
+                    // Standalone mode
+                    dynamicStudents.push(newStudent);
+                }
+
+                showMessage('تم إضافة الطالب بنجاح! 🎉', 'success');
+                document.getElementById('add-student-form').reset();
+                updateStudentCounts();
+                displayAllStudents();
+                populateTeachers();
+                populateSubjects();
+
+            } catch (error) {
+                showMessage('حدث خطأ أثناء إضافة الطالب', 'error');
+            }
+        }
+
+        async function addTeacher(e) {
+            e.preventDefault();
+            
+            const teacherName = document.getElementById('teacher-name').value.trim();
+            const selectedSubjects = Array.from(document.querySelectorAll('input[name="teacher-subjects"]:checked'))
+                .map(checkbox => checkbox.value);
+
+            if (!teacherName || selectedSubjects.length === 0) {
+                showMessage('يرجى إدخال اسم المعلم واختيار المواد', 'error');
+                return;
+            }
+
+            // Check if teacher already exists
+            if (dynamicTeachers.find(t => t.name === teacherName)) {
+                showMessage('المعلم موجود مسبقاً', 'error');
+                return;
+            }
+
+            const newTeacher = {
+                name: teacherName,
+                subjects: selectedSubjects
+            };
+
+            try {
+                if (window.dataSdk && typeof window.dataSdk.create === 'function') {
+                    const result = await window.dataSdk.create({
+                        type: 'teacher',
+                        ...newTeacher
+                    });
+
+                    if (!result.isOk) {
+                        throw new Error('فشل في إضافة المعلم');
+                    }
+                } else {
+                    // Standalone mode
+                    dynamicTeachers.push(newTeacher);
+                }
+
+                showMessage('تم إضافة المعلم بنجاح! 🎉', 'success');
+                document.getElementById('add-teacher-form').reset();
+                displayTeachersList();
+                populateTeachers();
+                populateSubjects();
+
+            } catch (error) {
+                showMessage('حدث خطأ أثناء إضافة المعلم', 'error');
+            }
+        }
+
+        async function addSubject(e) {
+            e.preventDefault();
+            
+            const subjectName = document.getElementById('subject-name').value.trim();
+
+            if (!subjectName) {
+                showMessage('يرجى إدخال اسم المادة', 'error');
+                return;
+            }
+
+            // Check if subject already exists
+            if (dynamicSubjects.includes(subjectName)) {
+                showMessage('المادة موجودة مسبقاً', 'error');
+                return;
+            }
+
+            try {
+                if (window.dataSdk && typeof window.dataSdk.create === 'function') {
+                    const result = await window.dataSdk.create({
+                        type: 'subject',
+                        name: subjectName
+                    });
+
+                    if (!result.isOk) {
+                        throw new Error('فشل في إضافة المادة');
+                    }
+                } else {
+                    // Standalone mode
+                    dynamicSubjects.push(subjectName);
+                }
+
+                showMessage('تم إضافة المادة بنجاح! 🎉', 'success');
+                document.getElementById('add-subject-form').reset();
+                displaySubjectsList();
+                populateTeacherSubjects();
+                populateSubjects();
+
+            } catch (error) {
+                showMessage('حدث خطأ أثناء إضافة المادة', 'error');
+            }
+        }
+
+        function displayTeachersList() {
+            const container = document.getElementById('teachers-list');
+            
+            let tableHTML = `
+                <table class="responsive-table min-w-full bg-white border border-gray-300 rounded-xl overflow-hidden">
+                    <thead class="bg-gradient-to-r from-green-600 to-blue-600 text-white">
+                        <tr>
+                            <th class="px-6 mobile-px-2 py-4 mobile-py-2 text-right text-sm mobile-text-xs font-bold uppercase tracking-wider">👨‍🏫 اسم المعلم</th>
+                            <th class="px-6 mobile-px-2 py-4 mobile-py-2 text-right text-sm mobile-text-xs font-bold uppercase tracking-wider">📚 المواد</th>
+                            <th class="px-6 mobile-px-2 py-4 mobile-py-2 text-right text-sm mobile-text-xs font-bold uppercase tracking-wider mobile-hidden">⚙️ الإجراءات</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+            `;
+
+            dynamicTeachers.forEach((teacher, index) => {
+                const rowClass = index % 2 === 0 ? 'bg-gray-50' : 'bg-white';
+                tableHTML += `
+                    <tr class="${rowClass} hover:bg-blue-50 transition-colors">
+                        <td class="px-6 mobile-px-2 py-4 mobile-py-2 whitespace-nowrap text-sm mobile-text-xs font-semibold text-gray-900">${teacher.name}</td>
+                        <td class="px-6 mobile-px-2 py-4 mobile-py-2 text-sm mobile-text-xs text-gray-600">${teacher.subjects.join(', ')}</td>
+                        <td class="px-6 mobile-px-2 py-4 mobile-py-2 whitespace-nowrap text-sm mobile-text-xs mobile-hidden">
+                            <button onclick="deleteTeacher('${teacher.name}')" class="text-red-600 hover:text-red-800 font-semibold">🗑️ حذف</button>
+                        </td>
+                    </tr>
+                `;
+            });
+
+            tableHTML += '</tbody></table>';
+            container.innerHTML = tableHTML;
+        }
+
+        function displaySubjectsList() {
+            const container = document.getElementById('subjects-list');
+            container.innerHTML = '';
+
+            dynamicSubjects.forEach(subject => {
+                const subjectCard = document.createElement('div');
+                subjectCard.className = 'bg-gradient-to-br from-purple-100 to-blue-100 p-6 mobile-p-4 rounded-2xl border-2 border-purple-200 hover:border-purple-400 transition-all modern-card';
+                subjectCard.innerHTML = `
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center">
+                            <div class="w-12 h-12 bg-purple-500 rounded-xl flex items-center justify-center ml-4">
+                                <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                    <path d="M9 4.804A7.968 7.968 0 005.5 4c-1.255 0-2.443.29-3.5.804v10A7.969 7.969 0 015.5 14c1.669 0 3.218.51 4.5 1.385A7.962 7.962 0 0114.5 14c1.255 0 2.443.29 3.5.804v-10A7.968 7.968 0 0014.5 4c-1.255 0-2.443.29-3.5.804V12a1 1 0 11-2 0V4.804z"/>
+                                </svg>
+                            </div>
+                            <div>
+                                <h5 class="text-lg mobile-text-sm font-bold text-gray-800">${subject}</h5>
+                                <p class="text-sm mobile-text-xs text-gray-600">مادة دراسية</p>
+                            </div>
+                        </div>
+                        <button onclick="deleteSubject('${subject}')" class="text-red-600 hover:text-red-800 font-semibold text-sm mobile-text-xs">
+                            🗑️ حذف
+                        </button>
+                    </div>
+                `;
+                container.appendChild(subjectCard);
+            });
+        }
+
+        function populateAttendanceFilters() {
+            // Populate students filter
+            const studentFilter = document.getElementById('filter-student');
+            studentFilter.innerHTML = '<option value="">جميع الطلاب</option>';
+            dynamicStudents.forEach(student => {
+                const option = document.createElement('option');
+                option.value = student.id;
+                option.textContent = student.name;
+                studentFilter.appendChild(option);
+            });
+
+            // Populate subjects filter
+            const subjectFilter = document.getElementById('filter-subject-mgmt');
+            subjectFilter.innerHTML = '<option value="">جميع المواد</option>';
+            dynamicSubjects.forEach(subject => {
+                const option = document.createElement('option');
+                option.value = subject;
+                option.textContent = subject;
+                subjectFilter.appendChild(option);
+            });
+        }
+
+        function filterAttendanceRecords() {
+            displayAttendanceRecords();
+        }
+
+        function displayAttendanceRecords() {
+            const container = document.getElementById('attendance-records-list');
+            const studentFilter = document.getElementById('filter-student').value;
+            const subjectFilter = document.getElementById('filter-subject-mgmt').value;
+            const dateFilter = document.getElementById('filter-date').value;
+
+            let filteredRecords = attendanceRecords;
+
+            if (studentFilter) {
+                filteredRecords = filteredRecords.filter(r => r.student_id === studentFilter);
+            }
+            if (subjectFilter) {
+                filteredRecords = filteredRecords.filter(r => r.subject === subjectFilter);
+            }
+            if (dateFilter) {
+                filteredRecords = filteredRecords.filter(r => r.date === dateFilter);
+            }
+
+            if (filteredRecords.length === 0) {
+                container.innerHTML = '<p class="text-gray-600 text-center py-8 text-lg mobile-text-sm">📊 لا توجد سجلات للعرض</p>';
+                return;
+            }
+
+            let tableHTML = `
+                <table class="responsive-table min-w-full bg-white border border-gray-300 rounded-xl overflow-hidden">
+                    <thead class="bg-gradient-to-r from-red-600 to-purple-600 text-white">
+                        <tr>
+                            <th class="px-6 mobile-px-2 py-4 mobile-py-2 text-right text-sm mobile-text-xs font-bold uppercase tracking-wider">👤 الطالب</th>
+                            <th class="px-6 mobile-px-2 py-4 mobile-py-2 text-right text-sm mobile-text-xs font-bold uppercase tracking-wider">📚 المادة</th>
+                            <th class="px-6 mobile-px-2 py-4 mobile-py-2 text-right text-sm mobile-text-xs font-bold uppercase tracking-wider mobile-hidden">📅 التاريخ</th>
+                            <th class="px-6 mobile-px-2 py-4 mobile-py-2 text-right text-sm mobile-text-xs font-bold uppercase tracking-wider">📊 الحالة</th>
+                            <th class="px-6 mobile-px-2 py-4 mobile-py-2 text-right text-sm mobile-text-xs font-bold uppercase tracking-wider">⚙️ الإجراءات</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+            `;
+
+            filteredRecords.forEach((record, index) => {
+                const statusIcon = record.status === 'حاضر' ? '✅' : '❌';
+                const statusClass = record.status === 'حاضر' ? 'text-green-600 bg-green-50' : 'text-red-600 bg-red-50';
+                const rowClass = index % 2 === 0 ? 'bg-gray-50' : 'bg-white';
+                
+                tableHTML += `
+                    <tr class="${rowClass} hover:bg-blue-50 transition-colors">
+                        <td class="px-6 mobile-px-2 py-4 mobile-py-2 whitespace-nowrap text-sm mobile-text-xs font-semibold text-gray-900">${record.student_name}</td>
+                        <td class="px-6 mobile-px-2 py-4 mobile-py-2 whitespace-nowrap text-sm mobile-text-xs text-gray-900">${record.subject}</td>
+                        <td class="px-6 mobile-px-2 py-4 mobile-py-2 whitespace-nowrap text-sm mobile-text-xs text-gray-600 mobile-hidden">${record.date}</td>
+                        <td class="px-6 mobile-px-2 py-4 mobile-py-2 whitespace-nowrap">
+                            <span class="px-3 mobile-px-2 py-1 rounded-full text-sm mobile-text-xs font-bold ${statusClass}">${statusIcon} ${record.status}</span>
+                        </td>
+                        <td class="px-6 mobile-px-2 py-4 mobile-py-2 whitespace-nowrap text-sm mobile-text-xs">
+                            <div class="flex space-x-reverse space-x-2">
+                                <button onclick="editAttendanceRecord('${record.__backendId}', '${record.status === 'حاضر' ? 'غائب' : 'حاضر'}')" class="text-blue-600 hover:text-blue-800 font-semibold">
+                                    ${record.status === 'حاضر' ? '❌ تغيير لغائب' : '✅ تغيير لحاضر'}
+                                </button>
+                                <button onclick="deleteAttendanceRecord('${record.__backendId}')" class="text-red-600 hover:text-red-800 font-semibold mr-2">🗑️ حذف</button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            });
+
+            tableHTML += '</tbody></table>';
+            container.innerHTML = tableHTML;
+        }
+
+        async function deleteTeacher(teacherName) {
+            if (!confirm(`هل أنت متأكد من حذف المعلم "${teacherName}"؟`)) {
+                return;
+            }
+
+            try {
+                const teacherIndex = dynamicTeachers.findIndex(t => t.name === teacherName);
+                if (teacherIndex > -1) {
+                    dynamicTeachers.splice(teacherIndex, 1);
+                    showMessage('تم حذف المعلم بنجاح', 'success');
+                    displayTeachersList();
+                    populateTeachers();
+                    populateSubjects();
+                }
+            } catch (error) {
+                showMessage('حدث خطأ أثناء حذف المعلم', 'error');
+            }
+        }
+
+        async function deleteSubject(subjectName) {
+            if (!confirm(`هل أنت متأكد من حذف المادة "${subjectName}"؟`)) {
+                return;
+            }
+
+            try {
+                const subjectIndex = dynamicSubjects.findIndex(s => s === subjectName);
+                if (subjectIndex > -1) {
+                    dynamicSubjects.splice(subjectIndex, 1);
+                    
+                    // Remove subject from all teachers
+                    dynamicTeachers.forEach(teacher => {
+                        teacher.subjects = teacher.subjects.filter(s => s !== subjectName);
+                    });
+
+                    showMessage('تم حذف المادة بنجاح', 'success');
+                    displaySubjectsList();
+                    displayTeachersList();
+                    populateTeacherSubjects();
+                    populateSubjects();
+                }
+            } catch (error) {
+                showMessage('حدث خطأ أثناء حذف المادة', 'error');
+            }
+        }
+
+        async function editAttendanceRecord(recordId, newStatus) {
+            try {
+                const record = attendanceRecords.find(r => r.__backendId === recordId);
+                if (record) {
+                    if (window.dataSdk && typeof window.dataSdk.update === 'function') {
+                        record.status = newStatus;
+                        const result = await window.dataSdk.update(record);
+                        if (!result.isOk) {
+                            throw new Error('فشل في تحديث السجل');
+                        }
+                    } else {
+                        // Standalone mode
+                        record.status = newStatus;
+                        updateDashboardStats();
+                        updateRecentActivity();
+                    }
+
+                    showMessage('تم تحديث السجل بنجاح', 'success');
+                    displayAttendanceRecords();
+                }
+            } catch (error) {
+                showMessage('حدث خطأ أثناء تحديث السجل', 'error');
+            }
+        }
+
+        async function deleteAttendanceRecord(recordId) {
+            if (!confirm('هل أنت متأكد من حذف هذا السجل؟')) {
+                return;
+            }
+
+            try {
+                const record = attendanceRecords.find(r => r.__backendId === recordId);
+                if (record) {
+                    if (window.dataSdk && typeof window.dataSdk.delete === 'function') {
+                        const result = await window.dataSdk.delete(record);
+                        if (!result.isOk) {
+                            throw new Error('فشل في حذف السجل');
+                        }
+                    } else {
+                        // Standalone mode
+                        const recordIndex = attendanceRecords.findIndex(r => r.__backendId === recordId);
+                        if (recordIndex > -1) {
+                            attendanceRecords.splice(recordIndex, 1);
+                            updateDashboardStats();
+                            updateRecentActivity();
+                        }
+                    }
+
+                    showMessage('تم حذف السجل بنجاح', 'success');
+                    displayAttendanceRecords();
+                }
+            } catch (error) {
+                showMessage('حدث خطأ أثناء حذف السجل', 'error');
+            }
+        }
+
+        // Auto-refresh sessions every 30 seconds for students
+        function startSessionRefresh() {
+            if (currentUser && currentUser.role === 'student') {
+                setInterval(() => {
+                    updateStudentSessionsDisplay();
+                }, 30000); // Refresh every 30 seconds
+            }
+        }
+
+        // Initialize app when DOM is loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            initApp();
+            // Start session refresh after user logs in
+            setTimeout(startSessionRefresh, 5000);
+        });
+    </script>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'995a363675b13574',t:'MTc2MTY1MjE4Ni4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
